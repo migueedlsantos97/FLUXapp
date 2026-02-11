@@ -1,0 +1,424 @@
+Lo que hace única a esta app para el mercado LATAM no es registrar gastos (eso lo hacen todas), sino el "Motor de Realidad". La mayoría de las apps asumen que el usuario empieza el mes en $0. FLUX asumirá que el usuario puede empezar en negativo o con el sueldo ya comido por cuotas y adelantos.
+
+Aquí tienes el código completo integrado. Es una Single Page Application (SPA) prototipo. Tiene:
+
+Onboarding Inteligente: Configura el "Sueldo Real" (descontando la bicicleta financiera).
+
+Dashboard (Veredicto): Te dice cuánto puedes gastar HOY.
+
+Historial y Patrones: Una lista tipo Home Banking con tus movimientos guardados.
+
+Navegación: Un menú inferior para moverse entre pantallas.
+
+1. El Código CSS (Estilos FLUX Completos)
+Este CSS incluye todo lo anterior más los estilos para el Historial y la Barra de Navegación.
+
+CSS
+/* === FLUX GLOBAL THEME === */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Exo+2:ital,wght@1,800&display=swap');
+
+:root {
+  --bg-app: #0f172a;
+  --bg-card: #1e293b;
+  --primary: #10b981; /* Verde Flux */
+  --primary-dim: rgba(16, 185, 129, 0.1);
+  --danger: #ef4444;  /* Rojo Deuda */
+  --warning: #f59e0b; /* Amarillo Alerta */
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* App Wrapper */
+.app-screen {
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  padding-bottom: 80px; /* Espacio para el menú inferior */
+  display: none; /* Por defecto ocultas */
+  animation: fadeIn 0.3s ease;
+}
+
+.app-screen.active { display: block; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* === BRANDING === */
+.header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; }
+.brand-logo {
+  font-family: 'Exo 2', sans-serif;
+  font-weight: 800; font-style: italic; font-size: 28px;
+  background: linear-gradient(135deg, #fff 30%, var(--primary) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin: 0;
+}
+
+/* === COMPONENTES === */
+.card {
+  background: var(--bg-card);
+  border-radius: 20px;
+  padding: 20px;
+  margin: 0 20px 20px 20px;
+  box-shadow: 0 10px 20px -5px rgba(0,0,0,0.3);
+}
+
+.input-box {
+  width: 100%; background: #334155; border: none; padding: 16px;
+  border-radius: 12px; color: white; font-size: 16px; outline: none;
+  box-sizing: border-box; margin-bottom: 12px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), #059669);
+  color: white; border: none; padding: 16px; width: 100%;
+  border-radius: 16px; font-weight: 700; font-size: 16px;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); cursor: pointer;
+}
+
+/* === DASHBOARD GAUGE === */
+.gauge-wrapper { position: relative; width: 220px; height: 220px; margin: 20px auto; display: flex; align-items: center; justify-content: center; }
+.gauge-bg { position: absolute; width: 100%; height: 100%; border-radius: 50%; background: #334155; mask: radial-gradient(transparent 62%, black 63%); -webkit-mask: radial-gradient(transparent 62%, black 63%); }
+.gauge-fill { position: absolute; width: 100%; height: 100%; border-radius: 50%; background: conic-gradient(var(--primary) 0%, transparent 0%); mask: radial-gradient(transparent 62%, black 63%); -webkit-mask: radial-gradient(transparent 62%, black 63%); transition: all 1s ease; }
+.gauge-text { text-align: center; z-index: 2; }
+.gauge-amount { font-size: 38px; font-weight: 800; display: block; letter-spacing: -1px; }
+.gauge-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+/* === HISTORIAL (LISTA DE MOVIMIENTOS) === */
+.history-list { padding: 0 20px; }
+.tx-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 0; border-bottom: 1px solid #334155;
+}
+.tx-left { display: flex; align-items: center; gap: 12px; }
+.tx-icon { width: 40px; height: 40px; background: #334155; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.tx-info h4 { margin: 0; font-size: 15px; font-weight: 600; }
+.tx-info span { font-size: 12px; color: var(--text-muted); }
+.tx-amount { font-weight: 700; font-size: 15px; }
+.tx-amount.neg { color: var(--text-main); } /* Gastos en blanco */
+.tx-amount.pos { color: var(--primary); } /* Ingresos en verde */
+
+/* === MENÚ INFERIOR (NAVBAR) === */
+.bottom-nav {
+  position: fixed; bottom: 0; width: 100%; max-width: 420px;
+  background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px);
+  border-top: 1px solid #334155; padding: 15px 0;
+  display: flex; justify-content: space-around; z-index: 100;
+}
+.nav-item { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; transition: color 0.3s; }
+.nav-item.active { color: var(--primary); transform: translateY(-2px); }
+.nav-add {
+  background: var(--primary); color: white; width: 50px; height: 50px;
+  border-radius: 50%; margin-top: -25px; box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+  display: flex; align-items: center; justify-content: center; font-size: 28px;
+}
+
+/* === MODAL CARGA (ADD) === */
+.fullscreen-modal {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: var(--bg-app); z-index: 200; display: none;
+  flex-direction: column; padding: 20px; box-sizing: border-box;
+}
+.big-input { background: transparent; border: none; font-size: 50px; color: white; text-align: center; width: 100%; outline: none; margin: 40px 0; font-weight: 700; }
+.cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.cat-btn { background: var(--bg-card); border: 2px solid transparent; border-radius: 12px; padding: 15px; color: var(--text-muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.cat-btn.selected { border-color: var(--primary); background: var(--primary-dim); color: white; }
+2. Estructura HTML (Las Pantallas)
+Copia esto en tu index.html. Notarás que hay secciones separadas por ID.
+
+HTML
+<div id="screen-home" class="app-screen active">
+    <div class="header">
+        <h1 class="brand-logo">FLUX</h1>
+        <div style="width:30px; height:30px; background:#334155; border-radius:50%; display:flex; align-items:center; justify-content:center;">👤</div>
+    </div>
+
+    <div class="gauge-wrapper">
+        <div class="gauge-bg"></div>
+        <div class="gauge-fill" id="gauge-fill"></div> <div class="gauge-text">
+            <span class="gauge-label">HOY PODÉS GASTAR</span>
+            <span class="gauge-amount" id="daily-budget">$0</span>
+            <span class="gauge-label" id="days-left">0 DÍAS RESTANTES</span>
+        </div>
+    </div>
+
+    <div style="display:flex; padding: 0 20px; gap: 10px;">
+        <div class="card" style="flex:1; margin:0; text-align:center; padding:15px;">
+            <span style="font-size:12px; color:var(--text-muted)">SALDO REAL</span>
+            <div style="font-size:18px; font-weight:bold; color:var(--primary);" id="total-balance">$0</div>
+        </div>
+        <div class="card" style="flex:1; margin:0; text-align:center; padding:15px;">
+            <span style="font-size:12px; color:var(--text-muted)">GASTADO MES</span>
+            <div style="font-size:18px; font-weight:bold; color:white;" id="total-spent">$0</div>
+        </div>
+    </div>
+
+    <div style="padding: 20px 20px 5px 20px; display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0; font-size:16px;">Actividad Reciente</h3>
+        <span style="font-size:12px; color:var(--primary);" onclick="navTo('history')">Ver todo</span>
+    </div>
+    <div class="history-list" id="recent-tx-list">
+        </div>
+</div>
+
+<div id="screen-history" class="app-screen">
+    <div class="header">
+        <h2>Historial</h2>
+        <button onclick="navTo('home')" style="background:none; border:none; color:white; font-size:20px;">✕</button>
+    </div>
+    <div class="card" style="margin-bottom:10px;">
+        <span class="gauge-label">BALANCE DEL MES</span>
+        <div style="font-size:24px; font-weight:700;">Febrero 2026</div>
+    </div>
+    <div class="history-list" id="full-history-list">
+        </div>
+</div>
+
+<div id="screen-setup" class="fullscreen-modal" style="background: var(--bg-app); z-index:300;">
+    <div style="text-align:center; margin-top:20px;">
+        <h1 class="brand-logo">FLUX</h1>
+        <p>Vamos a calcular tu realidad financiera.</p>
+    </div>
+
+    <div style="margin-top:20px;">
+        <label class="gauge-label">1. INGRESO NETO (Bolsillo)</label>
+        <input type="number" id="setup-income" class="input-box" placeholder="$50000">
+        
+        <label class="gauge-label" style="color:var(--danger)">2. ADELANTOS / DEUDAS YA RESTADAS</label>
+        <input type="number" id="setup-debt" class="input-box" placeholder="$25000" style="border:1px solid var(--danger)">
+        
+        <label class="gauge-label">3. GASTOS FIJOS (Alquiler + Cuotas)</label>
+        <input type="number" id="setup-fixed" class="input-box" placeholder="$15000">
+        
+        <button class="btn-primary" onclick="saveSetup()">CALCULAR MI FLUJO</button>
+    </div>
+</div>
+
+<div id="modal-add" class="fullscreen-modal">
+    <div class="header">
+        <h2 style="margin:0">Nuevo Gasto</h2>
+        <button onclick="closeAdd()" style="background:none; border:none; color:white; font-size:24px;">✕</button>
+    </div>
+
+    <div style="text-align:center;">
+        <span style="color:var(--primary); font-size:30px;">$</span>
+        <input type="tel" id="new-amount" class="big-input" placeholder="0" autofocus>
+    </div>
+
+    <div class="cat-grid" id="cat-grid">
+        </div>
+
+    <button class="btn-primary" style="margin-top:auto;" onclick="addTransaction()">CONFIRMAR</button>
+</div>
+
+<div class="bottom-nav">
+    <button class="nav-item active" onclick="navTo('home')">🏠</button>
+    <button class="nav-item nav-add" onclick="openAdd()">+</button>
+    <button class="nav-item" onclick="navTo('history')">📄</button>
+</div>
+3. JavaScript (El Cerebro Comercial)
+Este código gestiona:
+
+Persistencia: Guarda todo en la memoria del navegador (localStorage), así que si cierras y abres, los datos siguen ahí (como una app real).
+
+Lógica Financiera: Calcula el presupuesto diario basándose en los días que faltan.
+
+JavaScript
+// === BASE DE DATOS LOCAL ===
+const db = {
+    config: JSON.parse(localStorage.getItem('flux_config')) || null,
+    transactions: JSON.parse(localStorage.getItem('flux_transactions')) || []
+};
+
+// Categorías "Latam Standard"
+const categories = [
+    { id: 'super', name: 'Super', icon: '🛒' },
+    { id: 'delivery', name: 'Delivery', icon: '🍔' },
+    { id: 'transporte', name: 'Transp.', icon: '🚌' },
+    { id: 'ocio', name: 'Ocio', icon: '🍻' },
+    { id: 'servicios', name: 'Servicios', icon: '💡' },
+    { id: 'varios', name: 'Varios', icon: '📦' }
+];
+
+let selectedCat = '';
+
+// === INICIALIZACIÓN ===
+function init() {
+    if (!db.config) {
+        document.getElementById('screen-setup').style.display = 'flex';
+    } else {
+        updateDashboard();
+        renderHistory();
+    }
+    renderCategories();
+}
+
+// === LÓGICA DE CONFIGURACIÓN ===
+function saveSetup() {
+    const income = parseFloat(document.getElementById('setup-income').value) || 0;
+    const debt = parseFloat(document.getElementById('setup-debt').value) || 0;
+    const fixed = parseFloat(document.getElementById('setup-fixed').value) || 0;
+
+    // Guardamos la configuración
+    db.config = {
+        baseIncome: income,
+        preDeducted: debt, // Adelantos
+        fixedCosts: fixed, // Alquiler + Cuotas
+        startDate: new Date().toISOString()
+    };
+
+    localStorage.setItem('flux_config', JSON.stringify(db.config));
+    document.getElementById('screen-setup').style.display = 'none';
+    updateDashboard();
+}
+
+// === LÓGICA DEL DASHBOARD (VEREDICTO) ===
+function updateDashboard() {
+    // 1. Calcular Saldo Inicial Real
+    // Fórmula: (Ingreso - Adelantos - Fijos)
+    const initialAvailable = db.config.baseIncome - db.config.preDeducted - db.config.fixedCosts;
+
+    // 2. Sumar Gastos del Mes
+    const totalSpent = db.transactions.reduce((acc, curr) => acc + curr.amount, 0);
+
+    // 3. Dinero Actual en Mano
+    const currentBalance = initialAvailable - totalSpent;
+
+    // 4. Días Restantes (Asumimos fin de mes para el ejemplo, pero puede ser configurable)
+    const today = new Date();
+    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0); // Último día del mes
+    const daysLeft = Math.max(1, lastDay.getDate() - today.getDate());
+
+    // 5. Presupuesto Diario (Veredicto)
+    const dailyBudget = Math.floor(currentBalance / daysLeft);
+
+    // --- ACTUALIZAR UI ---
+    document.getElementById('total-balance').innerText = `$${currentBalance.toLocaleString()}`;
+    document.getElementById('total-spent').innerText = `$${totalSpent.toLocaleString()}`;
+    document.getElementById('days-left').innerText = `${daysLeft} DÍAS RESTANTES`;
+    document.getElementById('daily-budget').innerText = `$${dailyBudget}`;
+
+    // Color del Gauge según salud financiera
+    const gaugeFill = document.getElementById('gauge-fill');
+    let color = '#10b981'; // Verde
+    let percent = 100;
+
+    // Si gastaste más del 80% de tu disponible real
+    const spentPercentage = (totalSpent / initialAvailable) * 100;
+    
+    if (currentBalance < 0) {
+        color = '#ef4444'; // Rojo (Deuda)
+        percent = 100;
+        document.getElementById('daily-budget').innerText = '$0'; // No puedes gastar
+    } else if (spentPercentage > 75) {
+        color = '#f59e0b'; // Amarillo (Cuidado)
+        percent = 100 - spentPercentage;
+    } else {
+        percent = 100 - spentPercentage;
+    }
+
+    gaugeFill.style.background = `conic-gradient(${color} ${percent}%, transparent ${percent}%)`;
+}
+
+// === AGREGAR GASTOS ===
+function renderCategories() {
+    const grid = document.getElementById('cat-grid');
+    grid.innerHTML = '';
+    categories.forEach(cat => {
+        grid.innerHTML += `
+            <div class="cat-btn" onclick="selectCat(this, '${cat.id}')">
+                <span style="font-size:24px">${cat.icon}</span>
+                <span style="font-size:12px">${cat.name}</span>
+            </div>
+        `;
+    });
+}
+
+function selectCat(el, id) {
+    document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedCat = id;
+}
+
+function addTransaction() {
+    const amount = parseFloat(document.getElementById('new-amount').value);
+    if (!amount || !selectedCat) {
+        alert("Ingresa monto y categoría");
+        return;
+    }
+
+    const newTx = {
+        id: Date.now(),
+        amount: amount,
+        category: selectedCat,
+        date: new Date().toISOString(),
+        note: ''
+    };
+
+    db.transactions.unshift(newTx); // Agregar al inicio
+    localStorage.setItem('flux_transactions', JSON.stringify(db.transactions));
+    
+    closeAdd();
+    document.getElementById('new-amount').value = '';
+    updateDashboard();
+    renderHistory();
+}
+
+// === HISTORIAL ===
+function renderHistory() {
+    const list = document.getElementById('recent-tx-list');
+    const fullList = document.getElementById('full-history-list');
+    
+    // Generar HTML
+    let html = '';
+    if (db.transactions.length === 0) {
+        html = '<div style="text-align:center; padding:20px; color:#64748b">Sin movimientos aún</div>';
+    } else {
+        db.transactions.forEach(tx => {
+            const catInfo = categories.find(c => c.id === tx.category) || { name: 'Gasto', icon: '💸' };
+            const date = new Date(tx.date).toLocaleDateString('es-UY', { day: 'numeric', month: 'short' });
+            
+            html += `
+                <div class="tx-item">
+                    <div class="tx-left">
+                        <div class="tx-icon">${catInfo.icon}</div>
+                        <div class="tx-info">
+                            <h4>${catInfo.name}</h4>
+                            <span>${date}</span>
+                        </div>
+                    </div>
+                    <div class="tx-amount neg">-$${tx.amount}</div>
+                </div>
+            `;
+        });
+    }
+
+    if(list) list.innerHTML = html; // En dashboard (solo mostraré los primeros 3 con CSS si quisiera limitar)
+    if(fullList) fullList.innerHTML = html; // En pantalla historial
+}
+
+// === NAVEGACIÓN ===
+function navTo(screenId) {
+    document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(`screen-${screenId}`).classList.add('active');
+    
+    // Actualizar iconos nav
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    // Lógica simple para resaltar icono (omitida por brevedad)
+}
+
+function openAdd() { document.getElementById('modal-add').style.display = 'flex'; }
+function closeAdd() { document.getElementById('modal-add').style.display = 'none'; }
+
+// Iniciar App
+window.onload = init;
