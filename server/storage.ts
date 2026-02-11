@@ -1,38 +1,68 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
-
-// modify the interface with any CRUD methods
-// you might need
+import { db } from "./db";
+import { eq, desc } from "drizzle-orm";
+import { 
+    financialProfiles, transactions,
+    type FinancialProfile, type InsertFinancialProfile,
+    type Transaction, type InsertTransaction
+} from "@shared/schema";
 
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+    // Financial Profile
+    getFinancialProfile(userId: string): Promise<FinancialProfile | undefined>;
+    createOrUpdateFinancialProfile(userId: string, profile: InsertFinancialProfile): Promise<FinancialProfile>;
+
+    // Transactions
+    getTransactions(userId: string): Promise<Transaction[]>;
+    createTransaction(userId: string, transaction: InsertTransaction): Promise<Transaction>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
+export class DatabaseStorage implements IStorage {
+    async getFinancialProfile(userId: string): Promise<FinancialProfile | undefined> {
+        const [profile] = await db
+            .select()
+            .from(financialProfiles)
+            .where(eq(financialProfiles.userId, userId));
+        return profile;
+    }
 
-  constructor() {
-    this.users = new Map();
-  }
+    async createOrUpdateFinancialProfile(userId: string, profile: InsertFinancialProfile): Promise<FinancialProfile> {
+        // Check if exists
+        const existing = await this.getFinancialProfile(userId);
+        
+        if (existing) {
+            const [updated] = await db
+                .update(financialProfiles)
+                .set({
+                    ...profile,
+                    updatedAt: new Date()
+                })
+                .where(eq(financialProfiles.userId, userId))
+                .returning();
+            return updated;
+        } else {
+            const [created] = await db
+                .insert(financialProfiles)
+                .values({ ...profile, userId })
+                .returning();
+            return created;
+        }
+    }
 
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
-  }
+    async getTransactions(userId: string): Promise<Transaction[]> {
+        return await db
+            .select()
+            .from(transactions)
+            .where(eq(transactions.userId, userId))
+            .orderBy(desc(transactions.date));
+    }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
-  }
+    async createTransaction(userId: string, transaction: InsertTransaction): Promise<Transaction> {
+        const [created] = await db
+            .insert(transactions)
+            .values({ ...transaction, userId })
+            .returning();
+        return created;
+    }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
