@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, doublePrecision, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, doublePrecision, varchar, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 export * from "./models/auth";
@@ -8,7 +8,7 @@ export const financialProfiles = pgTable("financial_profiles", {
   userId: varchar("user_id").notNull(), // Link to auth users
   baseIncome: doublePrecision("base_income").notNull(), // Ingreso Neto
   preDeducted: doublePrecision("pre_deducted").notNull().default(0), // Deudas/Adelantos
-  fixedCosts: doublePrecision("fixed_costs").notNull().default(0), // Gastos Fijos
+  fixedCosts: jsonb("fixed_costs").$type<{ name: string; amount: number }[]>().notNull().default([]), // Gastos Fijos (Multiple)
   startDate: timestamp("start_date").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -27,13 +27,14 @@ export const insertFinancialProfileSchema = createInsertSchema(financialProfiles
   id: true,
   userId: true,
   updatedAt: true,
-  startDate: true, // Allow backend to manage start date if needed, or allow frontend if they can set historical
+  startDate: true,
 }).extend({
-    // Override number fields to handle coercion if needed, but doublePrecision handles numbers well.
-    // Making them required as per schema, but maybe optional in form? No, profile setup needs them.
     baseIncome: z.number().min(0, "Income must be positive"),
     preDeducted: z.number().min(0).default(0),
-    fixedCosts: z.number().min(0).default(0),
+    fixedCosts: z.array(z.object({
+        name: z.string().min(1, "Name is required"),
+        amount: z.number().min(0, "Amount must be positive"),
+    })).default([]),
 });
 
 export const insertTransactionSchema = createInsertSchema(transactions).omit({
