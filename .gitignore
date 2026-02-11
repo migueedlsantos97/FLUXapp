@@ -1,7 +1,32 @@
+# Dependencies
 node_modules
+
+# Build outputs
 dist
+out
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.production.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
 .DS_Store
+Thumbs.db
+
+# Runtime
 server/public
+.replit
+.local
+
+# Temporary files
 vite.config.ts.*
 *.tar.gz
-.local
+attached_assets/
