@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="https://vitejs.dev/logo.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flux Financial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              slate: {
+                50: '#F8FAFC',  // Light bg
+                100: '#F1F5F9', // Light border
+                200: '#E2E8F0', // Structural border
+                300: '#CBD5E1', // Dark secondary text
+                400: '#94A3B8',
+                500: '#64748B',
+                600: '#475569', // Light secondary text
+                700: '#334155', // Dark icons/accent
+                800: '#1E293B', // Dark card bg
+                900: '#0F172A', // Dark main bg
+              },
+              primary: {
+                50: '#ECFDF5',  // Light accent bg
+                400: '#34D399', // Dark accent icon
+                500: '#10B981', // Emerald/Neon
+                600: '#059669', // Primary CTA
+                900: '#064E3B', // Dark accent bg
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* Custom Scrollbar Global Styling */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1; /* slate-300 */
+        border-radius: 9999px;
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background-color: #334155; /* slate-700 */
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background-color: #94a3b8; /* slate-400 */
+      }
+      .dark ::-webkit-scrollbar-thumb:hover {
+        background-color: #475569; /* slate-600 */
+      }
+
+      /* Utility to hide scrollbar completely (for horizontal chips/lists) */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4",
+    "lucide-react": "https://esm.sh/lucide-react@^0.574.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-slate-50 text-slate-800 antialiased transition-colors duration-300 dark:bg-slate-900 dark:text-slate-50">
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
