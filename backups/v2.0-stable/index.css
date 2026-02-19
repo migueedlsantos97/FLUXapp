@@ -1,0 +1,193 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;600;700;900&display=swap');
+
+:root {
+    --primary: #10b981;
+    --primary-hover: #059669;
+    --bg-light: #f8fafc;
+    --bg-dark: #020617;
+    color-scheme: light dark;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-heading {
+    font-family: 'Outfit', sans-serif;
+}
+
+/* Glassmorphism primitives */
+.glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.dark .glass {
+    background: rgba(15, 23, 42, 0.7);
+}
+
+.glass-border {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass-border {
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Animations */
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.4s ease-out forwards;
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #1e293b;
+}
+
+/* Luxury shadows */
+.shadow-luxury {
+    box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.05);
+}
+
+.dark .shadow-luxury {
+    box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.4);
+}
+
+/* Design Tokens Standard CSS (No @apply) */
+.text-main {
+    color: #1e293b;
+}
+
+.dark .text-main {
+    color: #f8fafc;
+}
+
+.text-muted {
+    color: #64748b;
+}
+
+.dark .text-muted {
+    color: #94a3b8;
+}
+
+.text-accent {
+    color: #059669;
+}
+
+.dark .text-accent {
+    color: #34d399;
+}
+
+.bg-surface {
+    background-color: #ffffff;
+}
+
+.dark .bg-surface {
+    background-color: #1e293b;
+}
+
+.bg-surface-alt {
+    background-color: #f8fafc;
+}
+
+.dark .bg-surface-alt {
+    background-color: rgba(15, 23, 42, 0.5);
+}
+
+.border-main {
+    border-color: #f1f5f9;
+}
+
+.dark .border-main {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Premium Inputs & Selects - FORCED COLORS */
+.input-premium {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    font-weight: 700;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    outline: none;
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #1e293b !important;
+}
+
+.dark .input-premium {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #ffffff !important;
+}
+
+.select-premium {
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    font-weight: 700;
+    font-size: 0.875rem;
+    outline: none;
+    cursor: pointer;
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #1e293b !important;
+}
+
+.dark .select-premium {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #ffffff !important;
+}
+
+/* Specific styling for select options */
+select option {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+}
+
+.dark select option {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+}
+
+/* Gradient text */
+.text-gradient {
+    background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
