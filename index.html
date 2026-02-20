@@ -107,7 +107,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
-          .then(reg => console.log('WARDEN: Sentry Online (SW Registered)'))
+          .then(reg => console.log('WARDEN [V3.1-REAL] Sentry Online'))
           .catch(err => console.log('WARDEN: Sentry Offline Error:', err));
       });
     }
