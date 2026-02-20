@@ -32,7 +32,7 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDates, onToggleDate,
 
   const renderDays = () => {
     const days = [];
-    
+
     // Empty cells for previous month
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push(<div key={`empty-${i}`} className="h-10 w-10"></div>);
@@ -43,8 +43,8 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDates, onToggleDate,
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       const selected = isSelected(dateStr);
       const national = isNational(dateStr);
-      
-      let bgClass = "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700";
+
+      let bgClass = "bg-surface text-main hover:bg-white/5";
       let ringClass = "";
 
       if (selected) {
@@ -57,7 +57,7 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDates, onToggleDate,
       const today = new Date();
       const isToday = today.toISOString().split('T')[0] === dateStr;
       if (isToday && !selected) {
-         ringClass = "ring-2 ring-primary-200 dark:ring-primary-900";
+        ringClass = "ring-2 ring-primary-200 dark:ring-primary-900";
       }
 
       days.push(
@@ -75,7 +75,7 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDates, onToggleDate,
   };
 
   return (
-    <div className="w-full max-w-sm mx-auto bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+    <div className="w-full max-w-sm mx-auto bg-surface rounded-xl border border-main shadow-sm overflow-hidden">
       <div className="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-700">
         <button onClick={prevMonth} className="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
           <ChevronLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
@@ -87,7 +87,7 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDates, onToggleDate,
           <ChevronRight className="w-5 h-5 text-slate-600 dark:text-slate-400" />
         </button>
       </div>
-      
+
       <div className="p-4">
         <div className="grid grid-cols-7 gap-1 mb-2 text-center">
           {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(day => (
@@ -100,7 +100,7 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDates, onToggleDate,
           {renderDays()}
         </div>
       </div>
-      
+
       <div className="px-4 py-3 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-700 flex gap-4 text-xs">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-full bg-primary-600"></div>

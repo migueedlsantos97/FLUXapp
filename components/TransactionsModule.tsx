@@ -125,7 +125,7 @@ export const TransactionsModule: React.FC<TransactionsModuleProps> = ({ pulseDat
 
             {/* 1. Date Selector Premium */}
             <div className="flex items-center justify-between glass glass-border p-3 rounded-[2rem] shadow-luxury">
-                <button onClick={prevMonth} className="p-3 rounded-2xl hover:bg-white dark:hover:bg-slate-800 transition-all text-slate-400 hover:text-primary-600 hover:shadow-luxury">
+                <button onClick={prevMonth} className="p-3 rounded-2xl hover:bg-white/5 transition-all text-muted hover:text-main">
                     <ChevronLeft className="w-6 h-6" />
                 </button>
                 <div className="flex flex-col items-center">
@@ -134,12 +134,12 @@ export const TransactionsModule: React.FC<TransactionsModuleProps> = ({ pulseDat
                         {monthName}
                     </span>
                 </div>
-                <button onClick={nextMonth} className="p-3 rounded-2xl hover:bg-white dark:hover:bg-slate-800 transition-all text-slate-400 hover:text-primary-600 hover:shadow-luxury">
+                <button onClick={nextMonth} className="p-3 rounded-2xl hover:bg-white/5 transition-all text-muted hover:text-main">
                     <ChevronRight className="w-6 h-6" />
                 </button>
             </div>
 
-            {/* Flux Pulse Visualization - Moved here to declutter Dashboard */}
+            {/* Warden Pulse Visualization - Moved here to declutter Dashboard */}
             <PulseModule
                 data={pulseData}
                 daysInMonth={new Date(currentYear, currentMonth + 1, 0).getDate()}
@@ -190,20 +190,20 @@ export const TransactionsModule: React.FC<TransactionsModuleProps> = ({ pulseDat
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
-                    <div className="flex flex-col items-center p-3 rounded-2xl bg-white/50 dark:bg-slate-800/50 glass-border">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 mb-2 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{getImportanceLabel('vital', settings.language)}</span>
-                        <span className="text-xs font-black text-slate-700 dark:text-slate-200 mt-1">{((analytics.vital / (analytics.total || 1)) * 100).toFixed(0)}%</span>
+                    <div className="flex flex-col items-center p-3 rounded-2xl bg-surface glass-border">
+                        <div className="w-2 h-2 rounded-full bg-sentry-liberate mb-2 shadow-[0_0_8px_rgba(52,199,89,0.5)]"></div>
+                        <span className="text-[9px] font-black text-muted uppercase tracking-widest">{getImportanceLabel('vital', settings.language)}</span>
+                        <span className="text-xs font-black text-main mt-1">{((analytics.vital / (analytics.total || 1)) * 100).toFixed(0)}%</span>
                     </div>
-                    <div className="flex flex-col items-center p-3 rounded-2xl bg-white/50 dark:bg-slate-800/50 glass-border">
-                        <div className="w-2 h-2 rounded-full bg-blue-500 mb-2 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{getImportanceLabel('flexible', settings.language)}</span>
-                        <span className="text-xs font-black text-slate-700 dark:text-slate-200 mt-1">{((analytics.flexible / (analytics.total || 1)) * 100).toFixed(0)}%</span>
+                    <div className="flex flex-col items-center p-3 rounded-2xl bg-surface glass-border">
+                        <div className="w-2 h-2 rounded-full bg-sentry-observe mb-2 shadow-[0_0_8px_rgba(255,149,0,0.5)]"></div>
+                        <span className="text-[9px] font-black text-muted uppercase tracking-widest">{getImportanceLabel('flexible', settings.language)}</span>
+                        <span className="text-xs font-black text-main mt-1">{((analytics.flexible / (analytics.total || 1)) * 100).toFixed(0)}%</span>
                     </div>
-                    <div className="flex flex-col items-center p-3 rounded-2xl bg-white/50 dark:bg-slate-800/50 glass-border">
-                        <div className="w-2 h-2 rounded-full bg-purple-500 mb-2 shadow-[0_0_8px_rgba(168,85,247,0.5)]"></div>
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{getImportanceLabel('leisure', settings.language)}</span>
-                        <span className="text-xs font-black text-slate-700 dark:text-slate-200 mt-1">{((analytics.leisure / (analytics.total || 1)) * 100).toFixed(0)}%</span>
+                    <div className="flex flex-col items-center p-3 rounded-2xl bg-surface glass-border">
+                        <div className="w-2 h-2 rounded-full bg-sentry-active mb-2 shadow-[0_0_8px_rgba(255,59,48,0.5)]"></div>
+                        <span className="text-[9px] font-black text-muted uppercase tracking-widest">{getImportanceLabel('leisure', settings.language)}</span>
+                        <span className="text-xs font-black text-main mt-1">{((analytics.leisure / (analytics.total || 1)) * 100).toFixed(0)}%</span>
                     </div>
                 </div>
             </div>
@@ -249,7 +249,7 @@ export const TransactionsModule: React.FC<TransactionsModuleProps> = ({ pulseDat
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
-                                className={`glass glass-border p-3 sm:p-5 rounded-[2rem] shadow-sm flex flex-row justify-between items-center group relative overflow-hidden transition-all hover:bg-white dark:hover:bg-slate-800 ${expense.isImpulsive ? 'border-l-4 border-l-red-500 bg-red-50/10' : ''}`}
+                                className={`glass glass-border p-3 sm:p-5 rounded-[2rem] shadow-sm flex flex-row justify-between items-center group relative overflow-hidden transition-all hover:bg-white/5 ${expense.isImpulsive ? 'border-l-4 border-l-sentry-active bg-sentry-active/5' : ''}`}
                             >
 
                                 {editingId === expense.id ? (
@@ -274,7 +274,7 @@ export const TransactionsModule: React.FC<TransactionsModuleProps> = ({ pulseDat
                                     // View Mode
                                     <>
                                         <div className="flex items-center gap-3">
-                                            <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-white dark:bg-slate-900 glass-border flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-500 flex-shrink-0">
+                                            <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-surface glass-border flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-500 flex-shrink-0">
                                                 {getCategoryIcon(expense.category)}
                                             </div>
                                             <div className="min-w-0 flex-1">

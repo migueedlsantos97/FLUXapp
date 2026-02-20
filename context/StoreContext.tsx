@@ -48,8 +48,17 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   useEffect(() => {
     const loadLocalData = () => {
       const storageKeySuffix = user?.id || 'guest';
-      const savedSettingsRaw = localStorage.getItem(`flux_settings_${storageKeySuffix}`);
-      const savedDataRaw = localStorage.getItem(`flux_data_${storageKeySuffix}`);
+
+      // Migration logic: Fallback to old flux keys if warden keys are missing
+      let savedSettingsRaw = localStorage.getItem(`warden_settings_${storageKeySuffix}`);
+      if (!savedSettingsRaw) {
+        savedSettingsRaw = localStorage.getItem(`flux_settings_${storageKeySuffix}`);
+      }
+
+      let savedDataRaw = localStorage.getItem(`warden_data_${storageKeySuffix}`);
+      if (!savedDataRaw) {
+        savedDataRaw = localStorage.getItem(`flux_data_${storageKeySuffix}`);
+      }
 
       if (savedSettingsRaw) {
         const parsedSettings = JSON.parse(savedSettingsRaw) as UserSettings;
@@ -82,7 +91,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   useEffect(() => {
     if (isStoreLoaded) {
       const storageKeySuffix = user?.id || 'guest';
-      localStorage.setItem(`flux_settings_${storageKeySuffix}`, JSON.stringify(settings));
+      localStorage.setItem(`warden_settings_${storageKeySuffix}`, JSON.stringify(settings));
 
       // Si la bóveda está bloqueada, no sobreescribimos los datos cifrados con el estado parcial
       if (vaultIsLocked) return;
@@ -92,7 +101,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         dataToSave = 'vault:' + encrypt(dataToSave, settings.vaultPIN);
       }
 
-      localStorage.setItem(`flux_data_${storageKeySuffix}`, dataToSave);
+      localStorage.setItem(`warden_data_${storageKeySuffix}`, dataToSave);
     }
   }, [settings, data, user, isStoreLoaded, vaultIsLocked]);
 
@@ -265,7 +274,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     if (pin === settings.vaultPIN) {
       // Intentar recuperar datos cifrados de localStorage
       const storageKeySuffix = user?.id || 'guest';
-      const savedDataRaw = localStorage.getItem(`flux_data_${storageKeySuffix}`);
+      const savedDataRaw = localStorage.getItem(`warden_data_${storageKeySuffix}`) || localStorage.getItem(`flux_data_${storageKeySuffix}`);
 
       if (savedDataRaw && savedDataRaw.startsWith('vault:')) {
         try {

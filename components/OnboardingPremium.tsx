@@ -12,8 +12,6 @@ import {
     Bot,
     Palette,
     Check,
-    Sun,
-    Moon,
     Briefcase,
     Zap,
     ArrowRight,
@@ -51,7 +49,7 @@ export const OnboardingPremium: React.FC = () => {
     };
 
     const finalizeSetup = () => {
-        updateSettings({ ...localSettings, setupComplete: true });
+        updateSettings({ ...localSettings, setupComplete: true, theme: 'dark' });
         updateData(localData);
     };
 
@@ -76,7 +74,7 @@ export const OnboardingPremium: React.FC = () => {
                         <ShieldCheck className="w-12 h-12" />
                     </div>
                     <div className="space-y-2">
-                        <h2 className="text-3xl font-black text-slate-800 dark:text-white uppercase tracking-tighter">Bienvenido a Flux</h2>
+                        <h2 className="text-3xl font-black text-main uppercase tracking-tighter">Bienvenido a WARDEN</h2>
                         <p className="text-slate-500 dark:text-slate-400 font-medium max-w-sm">
                             No es solo una app de gastos. Es tu motor de realidad. Aquí tu tiempo es dinero, literalmente.
                         </p>
@@ -143,7 +141,7 @@ export const OnboardingPremium: React.FC = () => {
                         </div>
                     </div>
                     <div className="p-5 rounded-2xl border-2 border-dashed border-slate-100 dark:border-slate-800 text-sm text-slate-500 dark:text-slate-400 italic">
-                        "Separaremos este % de tus ingresos antes de calcular tu presupuesto diario. Es dinero que Flux protegerá de ti mismo."
+                        "Separaremos este % de tus ingresos antes de calcular tu ración diaria. Es dinero que Warden protegerá de ti mismo."
                     </div>
                 </div>
             )
@@ -161,7 +159,7 @@ export const OnboardingPremium: React.FC = () => {
                         <button
                             key={mode.id}
                             onClick={() => handleUpdateSettings('guardianMode', mode.id)}
-                            className={`w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all ${localSettings.guardianMode === mode.id ? 'border-primary-600 bg-primary-50 dark:bg-slate-800' : 'border-slate-100 dark:border-slate-900 bg-slate-50/50 dark:bg-slate-900/30'}`}
+                            className={`w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all ${localSettings.guardianMode === mode.id ? 'border-primary-600 bg-primary-600/10 shadow-[0_0_20px_rgba(255,59,48,0.05)]' : 'border-white/5 bg-white/5'}`}
                         >
                             <div className={`p-3 rounded-xl ${localSettings.guardianMode === mode.id ? 'bg-primary-600 text-white' : 'bg-white dark:bg-slate-800 text-slate-400'}`}>
                                 {mode.icon}
@@ -177,28 +175,6 @@ export const OnboardingPremium: React.FC = () => {
             )
         },
         {
-            title: "Preferencia Visual",
-            subtitle: "Limpio, enfocado y profesional.",
-            component: (
-                <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto">
-                    <button
-                        onClick={() => handleUpdateSettings('theme', 'light')}
-                        className={`p-6 rounded-3xl border-2 flex flex-col items-center gap-3 transition-all ${localSettings.theme === 'light' ? 'border-primary-600 bg-white ring-4 ring-primary-500/10 scale-105' : 'border-slate-100 bg-slate-50 grayscale opacity-50'}`}
-                    >
-                        <div className="p-4 bg-orange-100 text-orange-500 rounded-2xl"><Sun className="w-8 h-8" /></div>
-                        <span className="font-black text-[10px] uppercase tracking-widest text-slate-800">Modo Claro</span>
-                    </button>
-                    <button
-                        onClick={() => handleUpdateSettings('theme', 'dark')}
-                        className={`p-6 rounded-3xl border-2 flex flex-col items-center gap-3 transition-all ${localSettings.theme === 'dark' ? 'border-primary-600 bg-slate-800 ring-4 ring-primary-500/10 scale-105' : 'border-slate-800 bg-slate-900 grayscale opacity-50'}`}
-                    >
-                        <div className="p-4 bg-indigo-900 text-indigo-300 rounded-2xl"><Moon className="w-8 h-8" /></div>
-                        <span className="font-black text-[10px] uppercase tracking-widest text-white">Modo Oscuro</span>
-                    </button>
-                </div>
-            )
-        },
-        {
             title: "Blindaje Pro",
             subtitle: "Tus datos financieros, cifrados y bajo llave.",
             component: (
@@ -207,7 +183,7 @@ export const OnboardingPremium: React.FC = () => {
                         <LockIcon className="w-8 h-8" />
                     </div>
                     <div className="space-y-2">
-                        <p className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-tight">Establecer PIN Flux Vault</p>
+                        <p className="text-sm font-bold text-main uppercase tracking-tight">Establecer PIN Warden Vault</p>
                         <p className="text-[10px] text-slate-400 font-medium">Recomendado para proteger tu realidad en este dispositivo.</p>
                     </div>
 
@@ -234,7 +210,7 @@ export const OnboardingPremium: React.FC = () => {
     ];
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-50 dark:bg-slate-950 transition-colors duration-500 overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background transition-colors duration-500 overflow-hidden">
             {/* Background elements */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-30 dark:opacity-20 overflow-hidden">
                 <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary-500 rounded-full blur-[150px] animate-pulse"></div>
@@ -249,7 +225,7 @@ export const OnboardingPremium: React.FC = () => {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 1.05, y: -20 }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-white dark:border-slate-800 p-8 sm:p-12 overflow-hidden flex flex-col min-h-[500px]"
+                        className="bg-surface backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-main p-8 sm:p-12 overflow-hidden flex flex-col min-h-[500px]"
                     >
                         {/* Stepper Progress */}
                         <div className="flex gap-2 mb-10 overflow-hidden">

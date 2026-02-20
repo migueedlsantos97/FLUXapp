@@ -46,19 +46,19 @@ export const SecurityOverlay: React.FC = () => {
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-50/60 dark:bg-slate-950/80 backdrop-blur-2xl"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-background/60 backdrop-blur-2xl"
         >
             <div className="w-full max-w-sm p-8 flex flex-col items-center">
                 {/* Logo & Status */}
                 <motion.div
                     animate={error ? { x: [-10, 10, -10, 10, 0] } : {}}
-                    className={`w-20 h-20 rounded-3xl flex items-center justify-center mb-8 shadow-2xl transition-colors duration-500 ${error ? 'bg-red-500 text-white' : 'bg-primary-600 text-white'
+                    className={`w-20 h-20 rounded-3xl flex items-center justify-center mb-8 shadow-2xl transition-colors duration-500 ${error ? 'bg-sentry-active text-white' : 'bg-main text-black'
                         }`}
                 >
                     {error ? <ShieldAlert className="w-10 h-10" /> : <Lock className="w-10 h-10" />}
                 </motion.div>
 
-                <h2 className="text-2xl font-black text-slate-800 dark:text-white uppercase tracking-tighter mb-2">Flux Vault</h2>
+                <h2 className="text-2xl font-black text-main uppercase tracking-tighter mb-2">Warden Vault</h2>
                 <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-12">Introduce tu PIN de seguridad</p>
 
                 {/* PIN Display */}
@@ -67,9 +67,9 @@ export const SecurityOverlay: React.FC = () => {
                         <div
                             key={i}
                             className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${pin.length > i
-                                ? 'bg-primary-500 border-primary-500 scale-125 shadow-lg shadow-primary-500/50'
-                                : 'border-slate-300 dark:border-slate-700'
-                                } ${error ? 'border-red-500 bg-red-500' : ''}`}
+                                ? 'bg-main border-main scale-125 shadow-lg shadow-white/10'
+                                : 'border-white/10'
+                                } ${error ? 'border-sentry-active bg-sentry-active' : ''}`}
                         />
                     ))}
                 </div>
@@ -108,7 +108,7 @@ export const SecurityOverlay: React.FC = () => {
 const PadButton: React.FC<{ value: string, onClick: (v: string) => void }> = ({ value, onClick }) => (
     <button
         onClick={() => onClick(value)}
-        className="h-16 w-full rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-2xl font-black text-slate-700 dark:text-white shadow-sm active:scale-90 active:bg-slate-50 dark:active:bg-slate-800 transition-all flex items-center justify-center"
+        className="h-16 w-full rounded-2xl bg-surface border border-main text-2xl font-black text-main shadow-sm active:scale-95 active:bg-white/5 transition-all flex items-center justify-center"
     >
         {value}
     </button>

@@ -74,21 +74,21 @@ export const PulseModule: React.FC<PulseModuleProps> = ({ data, daysInMonth, cur
     const currentStatus = (data.currentSpent / (currentDay || 1)) > idealDaily;
 
     return (
-        <div className="bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm relative group">
+        <div className="bg-surface border border-main rounded-3xl p-6 shadow-sm relative group">
             {/* Header Pro */}
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
-                    <div className={`w-1.5 h-6 rounded-full ${currentStatus ? 'bg-red-500' : 'bg-emerald-500'}`} />
+                    <div className={`w-1.5 h-6 rounded-full ${currentStatus ? 'bg-sentry-active' : 'bg-sentry-liberate'}`} />
                     <div>
-                        <h3 className="text-base font-bold text-slate-800 dark:text-white leading-none">Flux Pulse</h3>
-                        <p className="text-[10px] text-slate-400 font-medium mt-1 uppercase tracking-widest">Auditoría Semanal</p>
+                        <h3 className="text-base font-black text-main leading-none uppercase tracking-tighter">Warden Pulse</h3>
+                        <p className="text-[10px] text-muted font-bold mt-1 uppercase tracking-widest">Auditoría Semanal</p>
                     </div>
                 </div>
 
                 {dayZero && (
-                    <div className={`px-3 py-1.5 rounded-xl border ${dayZero.isCritical ? 'bg-red-50/50 dark:bg-red-900/10 border-red-100 dark:border-red-900/30' : 'bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800'}`}>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight mr-2">Día Cero:</span>
-                        <span className={`text-xs font-black uppercase ${dayZero.isCritical ? 'text-red-500' : 'text-emerald-500'}`}>
+                    <div className={`px-3 py-1.5 rounded-xl border ${dayZero.isCritical ? 'bg-sentry-active/10 border-sentry-active/30' : 'bg-background/50 border-main'}`}>
+                        <span className="text-[9px] font-black text-muted uppercase tracking-tight mr-2">Día Cero:</span>
+                        <span className={`text-xs font-black uppercase ${dayZero.isCritical ? 'text-sentry-active' : 'text-sentry-liberate'}`}>
                             {dayZero.day === daysInMonth && !dayZero.isCritical ? 'A Salvo' : `Día ${dayZero.day}`}
                         </span>
                     </div>
@@ -96,28 +96,28 @@ export const PulseModule: React.FC<PulseModuleProps> = ({ data, daysInMonth, cur
             </div>
 
             {/* Gráfico Recharts - Estilo Semanal (L-D) */}
-            <div className="h-52 w-full mt-4 bg-slate-50/10 dark:bg-slate-900/5 rounded-xl p-2 overflow-hidden relative">
+            <div className="h-52 w-full mt-4 bg-background/30 rounded-xl p-2 overflow-hidden relative border border-main/20">
                 {!isMounted ? (
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-8 h-8 border-4 border-emerald-500/10 border-t-emerald-500 rounded-full animate-spin" />
+                        <div className="w-8 h-8 border-4 border-sentry-liberate/10 border-t-sentry-liberate rounded-full animate-spin" />
                     </div>
                 ) : (
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
                             <defs>
                                 <linearGradient id="colorGasto" x1="0" y1="0" x2="0" y2="100%">
-                                    <stop offset="5%" stopColor={currentStatus ? "#ef4444" : "#10b981"} stopOpacity={0.15} />
-                                    <stop offset="95%" stopColor={currentStatus ? "#ef4444" : "#10b981"} stopOpacity={0} />
+                                    <stop offset="5%" stopColor={currentStatus ? "#ff3b30" : "#34c759"} stopOpacity={0.15} />
+                                    <stop offset="95%" stopColor={currentStatus ? "#ff3b30" : "#34c759"} stopOpacity={0} />
                                 </linearGradient>
                             </defs>
 
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.2} />
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--main)" opacity={0.05} />
 
                             <XAxis
                                 dataKey="name"
                                 axisLine={false}
                                 tickLine={false}
-                                tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 700 }}
+                                tick={{ fontSize: 10, fill: 'var(--muted)', fontWeight: 900 }}
                                 interval={0}
                             />
 
@@ -125,11 +125,12 @@ export const PulseModule: React.FC<PulseModuleProps> = ({ data, daysInMonth, cur
 
                             <Tooltip
                                 contentStyle={{
+                                    backgroundColor: 'var(--surface)',
                                     borderRadius: '12px',
-                                    border: 'none',
-                                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                                    border: '1px solid var(--main)',
                                     fontSize: '11px',
-                                    fontWeight: 'bold'
+                                    fontWeight: '900',
+                                    textTransform: 'uppercase'
                                 }}
                                 formatter={(value: number) => [formatMoney(value), 'Gasto']}
                                 labelFormatter={(label, payload) => {
@@ -146,10 +147,10 @@ export const PulseModule: React.FC<PulseModuleProps> = ({ data, daysInMonth, cur
                             <Line
                                 type="monotone"
                                 dataKey="ideal"
-                                stroke="#94a3b8"
-                                strokeWidth={1.5}
-                                strokeDasharray="4 4"
-                                opacity={0.6}
+                                stroke="var(--main)"
+                                strokeWidth={1}
+                                strokeDasharray="6 6"
+                                opacity={0.3}
                                 dot={false}
                                 activeDot={false}
                             />
@@ -158,13 +159,13 @@ export const PulseModule: React.FC<PulseModuleProps> = ({ data, daysInMonth, cur
                             <Area
                                 type="monotone"
                                 dataKey="gasto"
-                                stroke={currentStatus ? "#ef4444" : "#10b981"}
-                                strokeWidth={2.5}
+                                stroke={currentStatus ? "var(--sentry-active)" : "var(--sentry-liberate)"}
+                                strokeWidth={3}
                                 fillOpacity={1}
                                 fill="url(#colorGasto)"
                                 animationDuration={1500}
-                                dot={{ r: 2, fill: currentStatus ? "#ef4444" : "#10b981" }}
-                                activeDot={{ r: 4, strokeWidth: 0 }}
+                                dot={{ r: 3, fill: currentStatus ? "var(--sentry-active)" : "var(--sentry-liberate)", strokeWidth: 0 }}
+                                activeDot={{ r: 5, strokeWidth: 0, fill: 'var(--main)' }}
                                 connectNulls={false}
                             />
                         </AreaChart>
@@ -173,17 +174,17 @@ export const PulseModule: React.FC<PulseModuleProps> = ({ data, daysInMonth, cur
             </div>
 
             {/* Footer de Datos */}
-            <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-50 dark:border-slate-900">
+            <div className="flex items-center justify-between mt-8 pt-6 border-t border-main/10">
                 <div className="space-y-1">
-                    <p className="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Ahorro Estimado</p>
-                    <p className={`text-lg font-black font-mono leading-none ${data.remaining < 0 ? 'text-red-500' : 'text-slate-800 dark:text-white'}`}>
+                    <p className="text-[9px] font-black uppercase text-muted tracking-widest">Ahorro Estimado</p>
+                    <p className={`text-lg font-black font-mono leading-none ${data.remaining < 0 ? 'text-sentry-active' : 'text-main'}`}>
                         {formatMoney(data.remaining)}
                     </p>
                 </div>
 
                 <div className="text-right space-y-1">
-                    <p className="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Media Diaria</p>
-                    <p className={`text-lg font-black font-mono leading-none ${currentStatus ? 'text-red-500' : 'text-emerald-500'}`}>
+                    <p className="text-[9px] font-black uppercase text-muted tracking-widest">Media Diaria</p>
+                    <p className={`text-lg font-black font-mono leading-none ${currentStatus ? 'text-sentry-active' : 'text-sentry-liberate'}`}>
                         {formatMoney(data.currentSpent / (currentDay || 1))}
                     </p>
                 </div>

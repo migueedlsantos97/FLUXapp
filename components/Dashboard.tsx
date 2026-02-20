@@ -10,12 +10,14 @@ import { DebtModule } from './DebtModule';
 import { TransactionsModule } from './TransactionsModule';
 import { SavingsModule } from './SavingsModule';
 import { Calendar } from './ui/Calendar';
+import { Select } from './ui/Select';
 import { URUGUAY_HOLIDAYS_2024 } from '../utils/holidays';
 import { calculateDailyBudget, calculateTotalIncome, calculateSequestration, convertToCurrency, calculateTodaySpend, getCategoryLabel, getImportanceLabel, calculateTotalSavingsContribution, generateDailyInsights, calculatePulseData, predictDayZero, calculatePreviousMonthLeftover, detectVampireExpenses, calculateUltimateFreedomDate } from '../utils/finance';
 import { PulseModule } from './PulseModule';
 import { parseSmartInput } from '../utils/ai';
 import { GuardianMode, Currency, VariableExpense, ExpenseCategory } from '../types';
 import { RealitySimulator } from './RealitySimulator';
+import { WardenLogo } from './WardenLogo';
 import {
     LogOut,
     LayoutDashboard,
@@ -105,15 +107,15 @@ interface ProfileModalProps {
 const NavItem: React.FC<NavItemProps> = ({ view, icon: Icon, label, currentView, onSetView }) => (
     <button
         onClick={() => onSetView(view)}
-        className={`flex flex-col items-center justify-center w-full py-3 transition-all duration-300 ${currentView === view
-            ? 'text-primary-600 dark:text-primary-400 transform -translate-y-1'
-            : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+        className={`flex flex-col items-center justify-center w-full py-4 transition-all duration-300 ${currentView === view
+            ? 'text-main transform -translate-y-1'
+            : 'text-muted hover:text-main'
             } `}
     >
-        <div className={`p-1 rounded-full mb-1 transition-all ${currentView === view ? 'bg-primary-50 dark:bg-primary-900/30' : ''} `}>
-            <Icon className={`w-6 h-6 ${currentView === view ? 'stroke-[2.5px]' : 'stroke-2'} `} />
+        <div className={`p-1.5 rounded-lg mb-1 transition-all ${currentView === view ? 'bg-surface shadow-[0_0_15px_rgba(255,255,255,0.05)]' : ''} `}>
+            <Icon className={`w-5 h-5 ${currentView === view ? 'stroke-[2.5px]' : 'stroke-2'} `} />
         </div>
-        <span className="text-[10px] font-semibold tracking-wide">{label}</span>
+        <span className="text-[9px] font-black uppercase tracking-widest">{label}</span>
     </button>
 );
 
@@ -128,12 +130,12 @@ const AuditorPanel: React.FC<{
     const getIcon = (name: string, type: string) => {
         const icons: any = { AlertCircle, ShieldCheck, Rocket, Shield, TrendingUp, Lightbulb };
         const Icon = icons[name] || Lightbulb;
-        const colorClass = type === 'alert' ? 'text-red-500' : type === 'success' ? 'text-emerald-500' : 'text-primary-500';
+        const colorClass = type === 'alert' ? 'text-sentry-active' : type === 'success' ? 'text-sentry-liberate' : 'text-main';
 
         return (
-            <div className={`p-2 rounded-xl flex-shrink-0 transition-all duration-500 group-hover:scale-110 ${type === 'alert' ? 'bg-red-50 dark:bg-red-900/20' :
-                type === 'success' ? 'bg-emerald-50 dark:bg-emerald-900/20' :
-                    'bg-primary-50 dark:bg-primary-900/20'
+            <div className={`p-2 rounded-lg flex-shrink-0 transition-all duration-500 group-hover:scale-110 ${type === 'alert' ? 'bg-sentry-active/10' :
+                type === 'success' ? 'bg-sentry-liberate/10' :
+                    'bg-surface'
                 }`}>
                 <Icon className={`w-4 h-4 ${colorClass}`} />
             </div>
@@ -147,33 +149,19 @@ const AuditorPanel: React.FC<{
     if (insights.length === 0) return null;
 
     return (
-        <div className="glass glass-border rounded-[2.5rem] overflow-hidden shadow-luxury transition-all duration-500 hover:shadow-primary-500/5">
+        <div className="bg-surface glass-border rounded-[2.5rem] overflow-hidden shadow-luxury border-none">
             <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white shadow-lg shadow-primary-500/20">
-                            <Activity className="w-5 h-5" />
-                        </div>
+                        <div className="w-2 h-2 rounded-full bg-sentry-active animate-pulse shadow-[0_0_10px_#FF3B30]" />
                         <div>
-                            <h3 className="text-xs font-black uppercase tracking-widest text-slate-800 dark:text-white leading-none">Flux Auditor</h3>
-                            <p className="text-[9px] text-slate-400 font-bold uppercase mt-1 tracking-tighter">Inteligencia de Flujo</p>
-                        </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-1">
-                        <button
-                            onClick={() => onSetView('transactions')}
-                            className="flex items-center gap-1 text-[9px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest hover:underline mb-1"
-                        >
-                            Ver Movimientos <ArrowLeft className="w-3 h-3 rotate-180" />
-                        </button>
-                        <div className="text-right">
-                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter mb-0.5">Fortaleza Total</p>
-                            <p className="text-sm font-black text-emerald-600 dark:text-emerald-400 leading-none">{formatMoney(totalSavings)}</p>
+                            <h3 className="text-xs font-black uppercase tracking-widest text-main leading-none">Sentry</h3>
+                            <p className="text-[9px] text-muted font-bold uppercase mt-1 tracking-tighter italic">Status: Observa.</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="space-y-5">
+                <div className="space-y-4">
                     {insights.map((insight, idx) => (
                         <motion.div
                             initial={{ opacity: 0, x: -10 }}
@@ -182,29 +170,13 @@ const AuditorPanel: React.FC<{
                             key={insight.id}
                             className="flex gap-4 items-start group relative"
                         >
-                            {getIcon(insight.icon, insight.type)}
-                            <div className="min-w-0 flex-1 pt-0.5">
-                                <div className="flex justify-between items-start gap-2">
-                                    <h4 className="text-[11px] font-black text-slate-800 dark:text-white leading-tight mb-1 group-hover:text-primary-500 transition-colors uppercase tracking-tight">{insight.title}</h4>
-                                    {insight.id.includes('peace') && (
-                                        <button
-                                            onClick={() => setIsProfileOpen(true)}
-                                            className="text-[9px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest hover:underline"
-                                        >
-                                            Ajustar
-                                        </button>
-                                    )}
-                                </div>
-                                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed">{insight.message}</p>
+                            <div className="min-w-0 flex-1">
+                                <p className="text-[11px] text-main font-bold leading-relaxed">{insight.message}</p>
                             </div>
-                            {idx < insights.length - 1 && (
-                                <div className="absolute -bottom-2.5 left-14 right-0 h-px bg-slate-100 dark:bg-slate-800/50" />
-                            )}
                         </motion.div>
                     ))}
                 </div>
             </div>
-
         </div>
     );
 };
@@ -224,60 +196,57 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
     lockVault,
     setIsSimulatorOpen
 }) => (
-    <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        className="space-y-6 pb-24"
-    >
-        {/* Hero Widget */}
-        <div className="glass glass-border rounded-[2.5rem] p-8 shadow-luxury relative overflow-hidden group mb-8">
-            <div className={`absolute -right-20 -top-20 w-60 h-60 rounded-full blur-[80px] opacity-20 pointer-events-none transition-colors duration-1000 ${remainingDailyAllowance < 0 ? 'bg-red-500' : 'bg-primary-500'}`}></div>
+    <div className="space-y-6">
+        {/* Hero Widget: Ración Diaria */}
+        <div className="bg-surface glass-border rounded-[2.5rem] p-8 shadow-luxury relative overflow-hidden group mb-8 border-none">
+            <div className={`absolute -right-20 -top-20 w-60 h-60 rounded-full blur-[80px] opacity-10 pointer-events-none transition-colors duration-1000 ${remainingDailyAllowance < 0 ? 'bg-sentry-active' : 'bg-sentry-liberate'}`}></div>
 
             <div className="relative z-10">
-                <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start gap-4 mb-6">
-                    <div className={`px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border ${verdict.bg} ${verdict.color} `}>
-                        {verdict.icon}
-                        <span>{verdict.text}</span>
+                <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start gap-4 mb-8">
+                    <div className={`px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest flex items-center gap-2 border-none bg-background/50 ${remainingDailyAllowance < 0 ? 'text-sentry-active' : 'text-sentry-liberate'} `}>
+                        <div className={`w-2 h-2 rounded-full animate-pulse ${remainingDailyAllowance < 0 ? 'bg-sentry-active' : 'bg-sentry-liberate'}`} />
+                        <span>Protocolo: {remainingDailyAllowance < 0 ? 'Quiebre' : 'Ración'}</span>
                     </div>
                     <div className="flex gap-2">
                         {settings.vaultPIN && (
-                            <button
+                            <Button
+                                variant="secondary"
                                 onClick={() => lockVault()}
-                                className="p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 hover:text-primary-500 transition-colors"
-                                title="Bloquear Bóveda"
+                                className="p-3 rounded-2xl bg-background/50 h-auto w-auto"
+                                title="Sellar Bóveda"
                             >
-                                <Shield className="w-5 h-5" />
-                            </button>
+                                <LockIcon className="w-5 h-5" />
+                            </Button>
                         )}
-                        <button
+                        <Button
+                            variant="secondary"
                             onClick={() => setIsImportCenterOpen(true)}
-                            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 hover:text-primary-500 transition-colors"
+                            className="p-3 rounded-2xl bg-background/50 h-auto w-auto"
                             title="Importar Datos"
                         >
                             <Database className="w-5 h-5" />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                            variant="secondary"
                             onClick={() => setIsSimulatorOpen(true)}
-                            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 hover:text-indigo-500 transition-colors"
+                            className="p-3 rounded-2xl bg-background/50 h-auto w-auto"
                             title="Reality Simulator"
                         >
                             <Calculator className="w-5 h-5" />
-                        </button>
+                        </Button>
                     </div>
                 </div>
 
                 <div className="text-center sm:text-left py-2">
-                    <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Disponible para Hoy</p>
-                    <h1 className={`text-5xl sm:text-6xl font-black tracking-tighter ${remainingDailyAllowance < 0 ? 'text-red-500' : 'text-slate-800 dark:text-white'}`}>
+                    <p className="text-muted text-xs font-black uppercase tracking-widest mb-2 opacity-60">Ración Disponible</p>
+                    <h1 className={`text-6xl sm:text-7xl font-black tracking-tighter ${remainingDailyAllowance < 0 ? 'text-sentry-active' : 'text-main'}`}>
                         {formatMoney(remainingDailyAllowance)}
                     </h1>
-                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 mt-2">
-                        <p className="text-xs text-slate-400 font-medium">{verdict.sub}</p>
-                        <div className="hidden sm:block w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 self-center"></div>
-                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50">
-                            <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-tight">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 mt-6">
+                        <p className="text-sm text-muted font-bold italic leading-tight max-w-[200px]">{verdict.sub}</p>
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-background/50 border border-surface">
+                            <ShieldCheck className="w-3.5 h-3.5 text-sentry-liberate" />
+                            <span className="text-[10px] font-black text-main uppercase tracking-widest">
                                 {calculateUltimateFreedomDate(data.debts)}
                             </span>
                         </div>
@@ -388,7 +357,7 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
             </motion.div>
 
 
-            {/* Flux Auditor Insights */}
+            {/* Warden Auditor Insights */}
             <div className="md:col-span-2">
                 <AuditorPanel
                     insights={insights}
@@ -435,7 +404,7 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
                 )}
             </div>
         </div>
-    </motion.div>
+    </div>
 );
 
 const SweepingModal: React.FC<{
@@ -564,39 +533,39 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-            <div className="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-                <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md animate-fade-in">
+            <div className="bg-surface w-full max-w-md rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-main">
+                <div className="p-4 border-b border-main flex justify-between items-center bg-surface-alt">
                     <h3 className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
                         {activeSettingsView === 'main' ? (
-                            <><UserIcon className="w-5 h-5 text-primary-600" /> Perfil & Ajustes</>
+                            <><UserIcon className="w-5 h-5 text-main" /> Perfil & Ajustes</>
                         ) : (
-                            <button onClick={() => setActiveSettingsView('main')} className="flex items-center gap-2 hover:text-primary-600 transition-colors">
+                            <button onClick={() => setActiveSettingsView('main')} className="flex items-center gap-2 hover:text-main transition-colors">
                                 <BackIcon className="w-5 h-5" /> Calendario de Precisión
                             </button>
                         )}
                     </h3>
                     <button onClick={() => { onClose(); setActiveSettingsView('main'); }} className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-                        <X className="w-5 h-5 text-slate-500" />
+                        <X className="w-5 h-5 text-muted" />
                     </button>
                 </div>
 
-                <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar">
+                <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar bg-surface">
                     {activeSettingsView === 'main' ? (
                         <>
                             {/* User Info */}
                             <div className="flex items-center gap-4 p-4 rounded-2xl bg-surface-alt border border-main">
-                                <div className="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center border-4 border-white dark:border-slate-800 shadow-sm">
-                                    <UserIcon className="w-8 h-8 text-primary-600" />
+                                <div className="w-16 h-16 rounded-full bg-background flex items-center justify-center border-4 border-main shadow-sm">
+                                    <UserIcon className="w-8 h-8 text-main" />
                                 </div>
                                 <div className="flex-1">
-                                    <h4 className="font-black text-main uppercase tracking-tight">{user?.name || 'Usuario Flux'}</h4>
+                                    <h4 className="font-black text-main uppercase tracking-tight">{user?.name || 'Sujeto Warden'}</h4>
                                     <p className="text-xs text-muted font-medium">{user?.email}</p>
                                     <div className="flex gap-2 mt-2">
-                                        <div className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Plan Reality</div>
+                                        <div className="px-2 py-0.5 rounded-full bg-sentry-liberate/10 text-[9px] font-bold text-sentry-liberate uppercase tracking-wider">Plan Reality</div>
                                     </div>
                                 </div>
-                                <button onClick={logout} className="p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition-colors">
+                                <button onClick={logout} className="p-2 rounded-xl hover:bg-sentry-active/10 text-sentry-active transition-colors">
                                     <LogOut className="w-5 h-5" />
                                 </button>
                             </div>
@@ -608,9 +577,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                 </h4>
                                 <div className="space-y-3">
                                     {/* Calendario Button */}
-                                    <button onClick={() => setActiveSettingsView('holidays')} className="w-full flex items-center justify-between p-4 rounded-xl border border-main bg-white dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all group">
+                                    <button onClick={() => setActiveSettingsView('holidays')} className="w-full flex items-center justify-between p-4 rounded-xl border border-main bg-white/5 hover:bg-white/10 transition-all group">
                                         <div className="flex items-center gap-3">
-                                            <div className="p-2 rounded-lg bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400">
+                                            <div className="p-2 rounded-lg bg-background text-main">
                                                 <CalendarDays className="w-5 h-5" />
                                             </div>
                                             <div className="text-left">
@@ -618,20 +587,20 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                 <p className="text-[10px] text-muted">Personaliza tus días no laborables</p>
                                             </div>
                                         </div>
-                                        <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-primary-500 transition-colors" />
+                                        <ChevronRight className="w-4 h-4 text-muted group-hover:text-main transition-colors" />
                                     </button>
 
                                     {/* Fondo Paz Mental Slider */}
-                                    <div className="p-4 rounded-xl border border-main bg-white dark:bg-slate-800/50">
+                                    <div className="p-4 rounded-xl border border-main bg-white/5">
                                         <div className="flex items-center gap-3 mb-3">
-                                            <div className="p-2 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400">
+                                            <div className="p-2 rounded-lg bg-background text-sentry-observe">
                                                 <Percent className="w-5 h-5" />
                                             </div>
                                             <div className="flex-1">
                                                 <p className="text-sm font-bold text-main">Fondo de Paz Mental</p>
                                                 <p className="text-[10px] text-muted">Reserva de seguridad mensual</p>
                                             </div>
-                                            <span className="text-sm font-black text-orange-600">{settings.peaceOfMindPercentage}%</span>
+                                            <span className="text-sm font-black text-sentry-observe">{settings.peaceOfMindPercentage}%</span>
                                         </div>
                                         <input
                                             type="range"
@@ -640,14 +609,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                             step="1"
                                             value={settings.peaceOfMindPercentage}
                                             onChange={(e) => updateSettings({ peaceOfMindPercentage: parseInt(e.target.value) })}
-                                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
+                                            className="w-full h-1.5 bg-background rounded-lg appearance-none cursor-pointer accent-main"
                                         />
                                     </div>
 
                                     {/* Sueldo Nominal Base (Fase 7.6 con Botón Guardar) */}
-                                    <div className="p-4 rounded-xl border border-main bg-white dark:bg-slate-800/50">
+                                    <div className="p-4 rounded-xl border border-main bg-white/5">
                                         <div className="flex items-center gap-3 mb-3">
-                                            <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400">
+                                            <div className="p-2 rounded-lg bg-background text-sentry-liberate">
                                                 <Coins className="w-5 h-5" />
                                             </div>
                                             <div className="flex-1">
@@ -656,32 +625,36 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                             </div>
                                         </div>
 
-                                        <div className="flex gap-2">
+                                        <div className="flex gap-2 items-center">
                                             <div className="relative flex-1">
                                                 <input
-                                                    type="number"
-                                                    value={localNominalAmount || ''}
-                                                    onChange={(e) => setLocalNominalAmount(parseFloat(e.target.value) || 0)}
-                                                    className="input-premium"
+                                                    type="text"
+                                                    inputMode="numeric"
+                                                    value={localNominalAmount === 0 ? '' : localNominalAmount.toLocaleString('es-UY')}
+                                                    onChange={(e) => {
+                                                        const raw = e.target.value.replace(/\D/g, '');
+                                                        setLocalNominalAmount(parseInt(raw) || 0);
+                                                    }}
+                                                    className="input-premium h-12"
                                                     placeholder="Monto..."
                                                 />
                                             </div>
-                                            <select
+                                            <Select
                                                 value={localNominalCurrency}
-                                                onChange={(e) => setLocalNominalCurrency(e.target.value as Currency)}
-                                                className="select-premium px-2"
-                                            >
-                                                {currencies.map(c => <option key={c} value={c}>{c}</option>)}
-                                            </select>
-                                            <button
+                                                onChange={val => setLocalNominalCurrency(val as Currency)}
+                                                options={currencies.map(c => ({ value: c, label: c }))}
+                                                className="w-28 flex-shrink-0"
+                                            />
+                                            <Button
+                                                variant="primary"
                                                 onClick={handleSaveNominal}
                                                 disabled={isSaving}
-                                                className={`px-3 py-2 rounded-lg font-bold text-xs transition-all ${isSaving ? 'bg-surface-alt text-muted' : 'bg-primary-600 text-white hover:bg-primary-700'}`}
+                                                className="px-6 h-12 flex-shrink-0"
                                             >
                                                 {isSaving ? '...' : 'Guardar'}
-                                            </button>
+                                            </Button>
                                         </div>
-                                        <p className="mt-2 text-[10px] text-slate-400 leading-tight italic">
+                                        <p className="mt-2 text-[10px] text-muted leading-tight italic">
                                             * Define cómo el Guardián valora tu tiempo. No afecta tu flujo real.
                                         </p>
                                     </div>
@@ -699,67 +672,46 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                             key={g.id}
                                             onClick={() => updateSettings({ guardianMode: g.id })}
                                             className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${settings.guardianMode === g.id
-                                                ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-200 dark:border-primary-800 ring-1 ring-primary-500'
-                                                : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 hover:border-primary-200 dark:hover:border-primary-800'
+                                                ? 'bg-main/10 border-main ring-1 ring-main'
+                                                : 'bg-white/5 border-main hover:bg-white/10'
                                                 }`}
                                         >
-                                            <div className={`p-2 rounded-lg ${settings.guardianMode === g.id ? 'bg-primary-600 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-500'}`}>
+                                            <div className={`p-2 rounded-lg ${settings.guardianMode === g.id ? 'bg-main text-background' : 'bg-background text-muted'}`}>
                                                 <g.icon className="w-4 h-4" />
                                             </div>
                                             <div className="flex-1">
-                                                <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{g.title}</p>
-                                                <p className="text-[10px] text-slate-400 font-medium">{g.desc}</p>
+                                                <p className="text-xs font-bold text-main">{g.title}</p>
+                                                <p className="text-[10px] text-muted font-medium">{g.desc}</p>
                                             </div>
-                                            {settings.guardianMode === g.id && <Check className="w-4 h-4 text-primary-600" />}
+                                            {settings.guardianMode === g.id && <Check className="w-4 h-4 text-main" />}
                                         </button>
                                     ))}
                                 </div>
                             </div>
 
-                            {/* Preferencias de Visualización */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="col-span-2">
-                                    <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2">
-                                        <LayoutDashboard className="w-3.5 h-3.5" /> Visualización
-                                    </h4>
-                                </div>
-                                <button
-                                    onClick={() => updateSettings({ theme: settings.theme === 'light' ? 'dark' : 'light' })}
-                                    className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-primary-200 transition-all group"
-                                >
-                                    <div className="flex items-center gap-2">
-                                        {settings.theme === 'light' ? <Sun className="w-4 h-4 text-orange-500" /> : <Moon className="w-4 h-4 text-blue-400" />}
-                                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Tema</span>
-                                    </div>
-                                    <div className={`w-8 h-4 rounded-full relative transition-colors ${settings.theme === 'dark' ? 'bg-primary-600' : 'bg-slate-200'}`}>
-                                        <div className={`absolute top-1 w-2 h-2 rounded-full bg-white transition-all ${settings.theme === 'dark' ? 'left-5' : 'left-1'}`}></div>
-                                    </div>
-                                </button>
-
-                                <div className="p-3 rounded-xl border border-main bg-white dark:bg-slate-800">
+                            <div className="space-y-3">
+                                <div className="p-3 rounded-xl border border-main bg-surface">
                                     <div className="flex items-center justify-between mb-1">
                                         <span className="text-[10px] font-bold text-muted uppercase">Moneda Base</span>
-                                        <Coins className="w-3 h-3 text-primary-500" />
+                                        <Coins className="w-3 h-3 text-main" />
                                     </div>
-                                    <select
+                                    <Select
                                         value={settings.baseCurrency}
-                                        onChange={(e) => updateSettings({ baseCurrency: e.target.value as Currency })}
-                                        className="w-full bg-surface border-none p-0 text-xs font-black text-main outline-none cursor-pointer"
-                                    >
-                                        {currencies.map(c => <option key={c} value={c}>{c}</option>)}
-                                    </select>
+                                        onChange={val => updateSettings({ baseCurrency: val as Currency })}
+                                        options={currencies.map(c => ({ value: c, label: c }))}
+                                    />
                                 </div>
                             </div>
 
                             {/* --- SEGURIDAD (VAULT) --- */}
                             <div>
                                 <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2">
-                                    <Shield className="w-3.5 h-3.5" /> Seguridad (Flux Vault)
+                                    <Shield className="w-3.5 h-3.5" /> Seguridad (Warden Vault)
                                 </h4>
                                 <div className="p-4 rounded-xl border border-main bg-white dark:bg-slate-800/50">
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400">
+                                            <div className="p-2 rounded-lg bg-background text-main">
                                                 <LockIcon className="w-5 h-5" />
                                             </div>
                                             <div>
@@ -767,7 +719,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                 <p className="text-[10px] text-muted">Protege tus datos cifrados</p>
                                             </div>
                                         </div>
-                                        <div className={`px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${settings.vaultPIN ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
+                                        <div className={`px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${settings.vaultPIN ? 'bg-sentry-liberate/10 text-sentry-liberate' : 'bg-white/5 text-muted'}`}>
                                             {settings.vaultPIN ? 'Activo' : 'Inactivo'}
                                         </div>
                                     </div>
@@ -796,7 +748,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                         )}
                                     </div>
                                     <p className="mt-3 text-[9px] text-slate-400 leading-tight italic">
-                                        * El PIN cifra tus datos localmente. Flux se bloqueará cada vez que reinicies la app.
+                                        * El PIN cifra tus datos localmente. Warden se bloqueará cada vez que reinicies la app.
                                     </p>
                                 </div>
                             </div>
@@ -824,7 +776,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                     </Button>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 
@@ -910,7 +862,7 @@ export const Dashboard: React.FC = () => {
         }
     };
 
-    // Flux Auditor Insights
+    // Warden Auditor Insights
     const now = new Date();
     const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
     const currentDayValue = now.getDate();
@@ -958,54 +910,54 @@ export const Dashboard: React.FC = () => {
         if (settings.guardianMode === 'military') {
             return isImpulsive
                 ? {
-                    title: "Veredicto: ¡Indisciplina!",
-                    message: `Gastaste ${formattedAmount} al divino botón. Tiraste ${formattedHours} horas de tu laburo hoy.`,
-                    icon: <ShieldAlert className="w-6 h-6 text-red-500" />,
-                    bg: "bg-red-50 dark:bg-red-900/20",
-                    border: "border-red-200 dark:border-red-800"
+                    title: "NO.",
+                    message: `Traición detectada. Malgastaste hoy.`,
+                    icon: <ShieldAlert className="w-6 h-6 text-sentry-active" />,
+                    bg: "bg-sentry-active/10",
+                    border: "border-sentry-active/30"
                 }
                 : {
-                    title: "Veredicto: Firme",
-                    message: "Tu esfuerzo de hoy está intacto, gran laburo. Seguí así.",
-                    icon: <ShieldCheck className="w-6 h-6 text-primary-600" />,
-                    bg: "bg-primary-50 dark:bg-primary-900/20",
-                    border: "border-primary-200 dark:border-primary-800"
+                    title: "ORDEN.",
+                    message: "Cumples el protocolo. Avanzas.",
+                    icon: <ShieldCheck className="w-6 h-6 text-sentry-liberate" />,
+                    bg: "bg-sentry-liberate/10",
+                    border: "border-sentry-liberate/30"
                 };
         }
 
         if (settings.guardianMode === 'analytic') {
             return isImpulsive
                 ? {
-                    title: "Análisis de Fuga",
-                    message: `Desvío impulsivo de ${formattedAmount}. Impacto de eficiencia: -${formattedHours}hs laborales.`,
-                    icon: <Zap className="w-6 h-6 text-orange-500" />,
-                    bg: "bg-orange-50 dark:bg-orange-900/20",
-                    border: "border-orange-200 dark:border-orange-800"
+                    title: "DESVÍO.",
+                    message: `Ineficiencia por impulsos detectada.`,
+                    icon: <Zap className="w-6 h-6 text-sentry-observe" />,
+                    bg: "bg-sentry-observe/10",
+                    border: "border-sentry-observe/30"
                 }
                 : {
-                    title: "Estado de Optimización",
-                    message: "Cero fugas detectadas hoy. Ratio de ahorro proyectado en niveles óptimos.",
-                    icon: <Zap className="w-6 h-6 text-primary-500" />,
-                    bg: "bg-slate-50 dark:bg-slate-900/30",
-                    border: "border-slate-200 dark:border-slate-700"
+                    title: "ÓPTIMO.",
+                    message: "Ratio de ahorro mantenido.",
+                    icon: <Zap className="w-6 h-6 text-sentry-liberate" />,
+                    bg: "bg-sentry-liberate/10",
+                    border: "border-sentry-liberate/30"
                 };
         }
 
-        // Colleague mode (default)
+        // Colleague mode (Sentry direct voice)
         return isImpulsive
             ? {
-                title: "Ojo con eso, che",
-                message: `Esos ${formattedAmount} dolieron. Son casi ${formattedHours} horas de remo que regalaste.`,
-                icon: <Bot className="w-6 h-6 text-blue-500" />,
-                bg: "bg-blue-50 dark:bg-blue-900/20",
-                border: "border-blue-200 dark:border-blue-800"
+                title: "TE VEO.",
+                message: `Me traicionaste. No debías.`,
+                icon: <Bot className="w-6 h-6 text-sentry-active" />,
+                bg: "bg-sentry-active/10",
+                border: "border-sentry-active/30"
             }
             : {
-                title: "¡Vamo' arriba!",
-                message: "Día redondito. No hubo impulsos y tu colchón financiero te lo agradece.",
-                icon: <Bot className="w-6 h-6 text-primary-600" />,
-                bg: "bg-primary-50 dark:bg-primary-900/20",
-                border: "border-primary-200 dark:border-primary-800"
+                title: "SIGO AQUÍ.",
+                message: "Estamos a mano. Cumpliste.",
+                icon: <Bot className="w-6 h-6 text-sentry-liberate" />,
+                bg: "bg-sentry-liberate/10",
+                border: "border-sentry-liberate/30"
             };
     };
 
@@ -1013,34 +965,34 @@ export const Dashboard: React.FC = () => {
 
     const getVerdict = () => {
         if (remainingDailyAllowance < 0) return {
-            text: 'Racha Rota',
-            sub: 'Has gastado más de lo disponible.',
-            color: 'text-red-600',
-            bg: 'bg-red-50 border-red-200',
+            text: 'TRAICIÓN.',
+            sub: 'Gastaste fuera de protocolo.',
+            color: 'text-sentry-active',
+            bg: 'bg-sentry-active/10 border-sentry-active/30',
             icon: <AlertTriangle className="w-5 h-5" />
         };
 
         if (impulsiveCount > 0) return {
-            text: 'Disciplina Comprometida',
-            sub: `${impulsiveCount} gastos impulsivos hoy.`,
-            color: 'text-orange-600',
-            bg: 'bg-orange-50 border-orange-200',
+            text: 'TENSIÓN.',
+            sub: 'Detecté impulsos. Me traicionas.',
+            color: 'text-sentry-observe',
+            bg: 'bg-sentry-observe/10 border-sentry-observe/30',
             icon: <ShieldAlert className="w-5 h-5" />
         };
 
         if (remainingDailyAllowance < 200) return {
-            text: 'Modo Guerra',
-            sub: 'Liquidez ajustada.',
-            color: 'text-yellow-600',
-            bg: 'bg-yellow-50 border-yellow-200',
+            text: 'RESTRICCIÓN.',
+            sub: 'Liquidez crítica. No gastes.',
+            color: 'text-sentry-observe',
+            bg: 'bg-sentry-observe/10 border-sentry-observe/40',
             icon: <ShieldAlert className="w-5 h-5" />
         };
 
         return {
-            text: 'Zona Segura',
-            sub: 'Finanzas bajo control.',
-            color: 'text-emerald-600',
-            bg: 'bg-emerald-50 border-emerald-200',
+            text: 'CUMPLIMIENTO.',
+            sub: 'Todo bajo control. Sigo.',
+            color: 'text-sentry-liberate',
+            bg: 'bg-sentry-liberate/10 border-sentry-liberate/30',
             icon: <ShieldCheck className="w-5 h-5" />
         };
     };
@@ -1140,72 +1092,95 @@ export const Dashboard: React.FC = () => {
 
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300 font-sans">
+        <div className="min-h-screen bg-background transition-colors duration-300 font-sans selection:bg-sentry-active selection:text-white">
 
-            {/* Top Bar */}
-            <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-20">
-                <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 bg-primary-600 rounded-md flex items-center justify-center text-white font-bold text-xs shadow-md">F</div>
-                        <span className="font-bold text-slate-800 dark:text-white text-sm tracking-tight">Flux</span>
+            {/* Top Bar - Warden Header */}
+            <header className="bg-background/80 backdrop-blur-md border-b border-surface sticky top-0 z-20">
+                <div className="max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <WardenLogo size={32} showText={false} />
+                        <span className="font-black text-main text-lg tracking-tighter">WARDEN.</span>
                     </div>
 
-                    {/* User Avatar - Trigger for Profile Modal */}
                     <div
-                        className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+                        className="flex items-center gap-2 cursor-pointer group"
                         onClick={() => setIsProfileOpen(true)}
                     >
-                        <span className="text-xs font-bold text-slate-600 dark:text-slate-300 hidden sm:block">{user?.name}</span>
-                        <img src={user?.avatar} alt="User" className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700" />
+                        <div className="text-right hidden sm:block">
+                            <p className="text-[10px] font-black text-muted uppercase tracking-widest leading-none">Sujeto</p>
+                            <p className="text-xs font-bold text-main">{user?.name}</p>
+                        </div>
+                        <img src={user?.avatar} alt="User" className="w-9 h-9 rounded-full border-2 border-surface group-hover:border-sentry-active transition-colors shadow-lg" />
                     </div>
                 </div>
             </header>
 
             {/* Main Content Area */}
-            <main className="max-w-2xl mx-auto px-4 pt-6">
-                <AnimatePresence mode="wait">
+            <main className="max-w-2xl mx-auto px-4 pt-6 relative min-h-[85vh]">
+                <AnimatePresence mode="popLayout" initial={false}>
                     {currentView === 'dashboard' && (
-                        <DashboardHome
+                        <motion.div
                             key="dashboard"
-                            remainingDailyAllowance={remainingDailyAllowance}
-                            verdict={verdict}
-                            streakData={streakData}
-                            guardianVerdict={guardianVerdict}
-                            data={data}
-                            settings={settings}
-                            formatMoney={formatMoney}
-                            setIsImportCenterOpen={setIsImportCenterOpen}
-                            setIsProfileOpen={setIsProfileOpen}
-                            setIsSimulatorOpen={setIsSimulatorOpen}
-                            onSetView={setCurrentView}
-                            insights={dailyInsights}
-                            lockVault={lockVault}
-                        />
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                            className="pb-24 w-full"
+                        >
+                            <DashboardHome
+                                remainingDailyAllowance={remainingDailyAllowance}
+                                verdict={verdict}
+                                streakData={streakData}
+                                guardianVerdict={guardianVerdict}
+                                data={data}
+                                settings={settings}
+                                formatMoney={formatMoney}
+                                setIsImportCenterOpen={setIsImportCenterOpen}
+                                setIsProfileOpen={setIsProfileOpen}
+                                setIsSimulatorOpen={setIsSimulatorOpen}
+                                onSetView={setCurrentView}
+                                insights={dailyInsights}
+                                lockVault={lockVault}
+                            />
+                        </motion.div>
                     )}
 
                     {currentView === 'budget' && (
                         <motion.div
                             key="budget"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            className="pb-24"
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            transition={{ duration: 0.25, ease: "easeOut" }}
+                            className="pb-24 w-full origin-top"
                         >
                             <div className="mb-6 px-1">
                                 <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Previsión</h2>
                                 <p className="text-sm text-slate-500 dark:text-slate-400">Control de Ingresos y Gastos Fijos</p>
                             </div>
-                            <BudgetModule />
+                            <BudgetModule
+                                pulseData={calculatePulseData(data, settings, daysInMonth, currentDayValue)}
+                                dayZero={predictDayZero(
+                                    calculatePulseData(data, settings, daysInMonth, currentDayValue).initialDisposable,
+                                    calculatePulseData(data, settings, daysInMonth, currentDayValue).currentSpent,
+                                    currentDayValue,
+                                    daysInMonth
+                                )}
+                                formatMoneyProp={formatMoney}
+                                daysInMonth={daysInMonth}
+                                currentDay={currentDayValue}
+                            />
                         </motion.div>
                     )}
 
                     {currentView === 'debts' && (
                         <motion.div
                             key="debts"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            className="pb-24"
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            transition={{ duration: 0.25, ease: "easeOut" }}
+                            className="pb-24 w-full origin-top"
                         >
                             <div className="mb-6 px-1">
                                 <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Pasivos</h2>
@@ -1218,10 +1193,11 @@ export const Dashboard: React.FC = () => {
                     {currentView === 'transactions' && (
                         <motion.div
                             key="transactions"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            className="pb-24"
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            transition={{ duration: 0.25, ease: "easeOut" }}
+                            className="pb-24 w-full origin-top"
                         >
                             <div className="mb-6 px-1">
                                 <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Movimientos</h2>
@@ -1243,10 +1219,11 @@ export const Dashboard: React.FC = () => {
                     {currentView === 'savings' && (
                         <motion.div
                             key="savings"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            className="pb-24"
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            transition={{ duration: 0.25, ease: "easeOut" }}
+                            className="pb-24 w-full origin-top"
                         >
                             <div className="mb-6 px-1">
                                 <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Bóveda</h2>
@@ -1258,63 +1235,63 @@ export const Dashboard: React.FC = () => {
                 </AnimatePresence>
             </main>
 
-            {/* Bottom Navigation Bar */}
-            <nav className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 z-30 pb-safe">
-                <div className="max-w-2xl mx-auto flex justify-around items-center px-2">
+            {/* Bottom Navigation Bar - Warden Style */}
+            <nav className="fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-xl border-t border-surface z-30 pb-safe">
+                <div className="max-w-2xl mx-auto flex justify-around items-center px-4">
                     <NavItem view="dashboard" icon={LayoutDashboard} label="Inicio" currentView={currentView} onSetView={setCurrentView} />
                     <NavItem view="budget" icon={Wallet} label="Previsión" currentView={currentView} onSetView={setCurrentView} />
 
-                    {/* Central FAB - Confesar Gasto */}
-                    <div className="relative -top-5 px-2">
+                    {/* Central FAB - Sentry Input */}
+                    <div className="relative -top-6 px-2">
                         <button
                             onClick={() => setIsConfessionOpen(true)}
-                            className="w-16 h-16 bg-primary-600 dark:bg-primary-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-primary-600/40 hover:scale-110 active:scale-95 transition-all duration-300 border-4 border-white dark:border-slate-900 group"
+                            className="w-16 h-16 bg-main rounded-2xl flex items-center justify-center text-background shadow-[0_0_20px_rgba(245,245,247,0.2)] hover:scale-110 active:scale-95 transition-all duration-300 border-4 border-background group"
                         >
                             <Plus className="w-8 h-8 group-hover:rotate-90 transition-transform duration-300" />
                         </button>
                     </div>
 
-                    <NavItem view="savings" icon={PiggyBank} label="Cofres" currentView={currentView} onSetView={setCurrentView} />
+                    <NavItem view="savings" icon={PiggyBank} label="Bóvedas" currentView={currentView} onSetView={setCurrentView} />
                     <NavItem view="debts" icon={CreditCard} label="Deudas" currentView={currentView} onSetView={setCurrentView} />
                 </div>
             </nav>
 
             {/* Modals */}
             {isConfessionOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden transform transition-all scale-100 p-6">
-                        <div className="text-center mb-6">
-                            <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center mx-auto mb-3 text-primary-600">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md animate-fade-in">
+                    <div className="bg-surface w-full max-w-sm rounded-[2rem] border border-surface shadow-2xl overflow-hidden transform transition-all scale-100 p-8">
+                        <div className="text-center mb-8">
+                            <div className="w-12 h-12 bg-sentry-active/10 rounded-xl flex items-center justify-center mx-auto mb-4 text-sentry-active shadow-[0_0_15px_rgba(255,59,48,0.2)]">
                                 <BrainCircuit className="w-6 h-6" />
                             </div>
-                            <h3 className="text-xl font-bold text-slate-800 dark:text-white">Confesión Inteligente</h3>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                Flux separa gastos compuestos.<br />Ej: "1500 súper y 200 taxi"
+                            <h3 className="text-xl font-black text-main tracking-tighter uppercase">Sentry: Entrada</h3>
+                            <p className="text-[10px] text-muted font-bold uppercase mt-2 tracking-widest italic">
+                                Sentry procesa tu realidad.<br />Ej: "1500 súper y 200 taxi"
                             </p>
                         </div>
 
                         <form onSubmit={handleConfessionSubmit}>
                             <textarea
                                 autoFocus
-                                className="w-full h-24 p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border-none focus:ring-2 focus:ring-primary-500 resize-none text-center text-lg text-slate-800 dark:text-white placeholder-slate-300"
+                                className="w-full h-24 p-4 rounded-xl bg-background border border-surface focus:border-sentry-active transition-colors outline-none resize-none text-center text-xl text-main font-bold placeholder-surface"
                                 placeholder="..."
                                 value={confessionText}
                                 onChange={(e) => setConfessionText(e.target.value)}
                             />
 
-                            <div className="flex items-center justify-center gap-3 my-4">
-                                <label className="text-sm font-medium text-slate-600 dark:text-slate-300">¿Gasto Impulsivo?</label>
+                            <div className="flex items-center justify-center gap-4 my-6">
+                                <label className="text-[10px] font-black text-muted uppercase tracking-widest">¿Traición Impulsiva?</label>
                                 <div
-                                    className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${isImpulsive ? 'bg-red-500' : 'bg-slate-200 dark:bg-slate-600'}`}
+                                    className={`w-12 h-6 rounded-lg p-1 cursor-pointer transition-colors ${isImpulsive ? 'bg-sentry-active' : 'bg-surface'}`}
                                     onClick={() => setIsImpulsive(!isImpulsive)}
                                 >
-                                    <div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform ${isImpulsive ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                                    <div className={`w-4 h-4 bg-main rounded-sm transform transition-transform ${isImpulsive ? 'translate-x-6' : 'translate-x-0'}`}></div>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-3 mt-4">
-                                <Button variant="ghost" type="button" onClick={() => setIsConfessionOpen(false)}>Cancelar</Button>
-                                <Button type="submit">Confesar</Button>
+                                <button className="px-6 py-3 rounded-xl text-muted font-bold text-xs uppercase tracking-widest hover:text-main transition-colors" type="button" onClick={() => setIsConfessionOpen(false)}>Cancelar</button>
+                                <button className="px-6 py-3 rounded-xl bg-main text-background font-black text-xs uppercase tracking-widest hover:scale-[1.02] transition-transform" type="submit">Procesar</button>
                             </div>
                         </form>
                     </div>

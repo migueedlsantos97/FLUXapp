@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../context/StoreContext';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
+import { Select } from './ui/Select';
 import { Income, FixedExpense, Currency, ExpenseCategory, IncomeType, ExpensePriority } from '../types';
 import { calculatePayday, calculateTotalIncome, calculateSequestration, convertToCurrency } from '../utils/finance';
 import { getHolidays } from '../utils/holidays';
@@ -23,8 +24,17 @@ import {
     X,
     Check
 } from 'lucide-react';
+import { PulseModule } from './PulseModule';
 
-export const BudgetModule: React.FC = () => {
+interface BudgetModuleProps {
+    pulseData: any;
+    dayZero: any;
+    formatMoneyProp: (amount: number) => string;
+    daysInMonth: number;
+    currentDay: number;
+}
+
+export const BudgetModule: React.FC<BudgetModuleProps> = ({ pulseData, dayZero, formatMoneyProp, daysInMonth, currentDay }) => {
     const {
         data, settings, updateData,
         addIncome, updateIncome, removeIncome,
@@ -186,14 +196,14 @@ export const BudgetModule: React.FC = () => {
                 {/* Hourly Rate Widget */}
                 <motion.div
                     whileHover={{ scale: 1.02 }}
-                    className="bg-gradient-to-br from-primary-600 to-indigo-700 rounded-[2rem] p-6 text-white shadow-luxury relative overflow-hidden"
+                    className="bg-surface rounded-[2rem] p-6 text-main border border-main shadow-luxury relative overflow-hidden"
                 >
-                    <div className="absolute top-0 right-0 p-4 opacity-10">
+                    <div className="absolute top-0 right-0 p-4 opacity-5">
                         <Briefcase className="w-16 h-16" />
                     </div>
-                    <p className="text-primary-100 text-[10px] font-black uppercase tracking-widest mb-1">Tu Valor Hora</p>
-                    <h3 className="text-3xl font-black tracking-tighter">{formatMoney(data.hourlyRate)}</h3>
-                    <p className="text-[10px] text-primary-200 mt-2 font-medium opacity-80">Ingreso Neto / Horas Reales</p>
+                    <p className="text-muted text-[10px] font-black uppercase tracking-widest mb-1">Tu Valor Hora</p>
+                    <h3 className="text-3xl font-black tracking-tighter text-sentry-liberate">{formatMoney(data.hourlyRate)}</h3>
+                    <p className="text-[10px] text-muted mt-2 font-medium opacity-80">Ingreso Neto / Horas Reales</p>
                 </motion.div>
 
                 {/* Exchange Rate Input */}
@@ -219,7 +229,7 @@ export const BudgetModule: React.FC = () => {
                     className="w-full p-6 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"
                 >
                     <div className="flex items-center gap-4">
-                        <div className={`p-4 rounded-2xl ${sequestration.pending > 0 ? 'bg-orange-100 text-orange-600' : 'bg-emerald-100 text-emerald-600'}`}>
+                        <div className={`p-4 rounded-2xl ${sequestration.pending > 0 ? 'bg-sentry-observe/10 text-sentry-observe' : 'bg-sentry-liberate/10 text-sentry-liberate'}`}>
                             <Lock className="w-6 h-6" />
                         </div>
                         <div className="text-left">
@@ -260,7 +270,7 @@ export const BudgetModule: React.FC = () => {
                                     <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Desglose de Fondos Retenidos</h4>
                                     <div className="space-y-3">
                                         {data.fixedExpenses.filter(e => !e.isPaid).length === 0 ? (
-                                            <p className="text-xs text-slate-400 italic text-center py-4 bg-white/50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">No hay fondos retenidos actualmente.</p>
+                                            <p className="text-xs text-muted italic text-center py-4 bg-surface rounded-2xl border border-dashed border-main">No hay fondos retenidos actualmente.</p>
                                         ) : (
                                             data.fixedExpenses.filter(e => !e.isPaid).map(exp => {
                                                 const convertedAmount = convertToCurrency(exp.amount, exp.currency, settings.baseCurrency, data.exchangeRate);
@@ -300,18 +310,29 @@ export const BudgetModule: React.FC = () => {
                 </AnimatePresence>
             </div>
 
+            {/* 2.5 WARDEN PULSE INTEGRATION */}
+            <div className="mb-8 overflow-hidden">
+                <PulseModule
+                    data={pulseData}
+                    daysInMonth={daysInMonth}
+                    currentDay={currentDay}
+                    formatMoney={formatMoneyProp}
+                    dayZero={dayZero}
+                />
+            </div>
+
             {/* 3. TABS & LISTS */}
             <div>
-                <div className="flex p-1.5 glass glass-border rounded-2xl mb-6 shadow-luxury">
+                <div className="flex p-1.5 bg-surface-alt border border-main rounded-2xl mb-6 shadow-xl">
                     <button
                         onClick={() => { setActiveTab('incomes'); closeForms(); }}
-                        className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'incomes' ? 'bg-white dark:bg-slate-700 text-primary-600 shadow-luxury' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
+                        className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'incomes' ? 'bg-main text-background' : 'text-muted hover:text-main'}`}
                     >
                         Ingresos
                     </button>
                     <button
                         onClick={() => { setActiveTab('expenses'); closeForms(); }}
-                        className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'expenses' ? 'bg-white dark:bg-slate-700 text-primary-600 shadow-luxury' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
+                        className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'expenses' ? 'bg-main text-background' : 'text-muted hover:text-main'}`}
                     >
                         Gastos Fijos
                     </button>
@@ -330,7 +351,7 @@ export const BudgetModule: React.FC = () => {
                                 <Button
                                     variant="ghost"
                                     onClick={() => { setEditingId(null); setShowForms(true); }}
-                                    className="w-full h-16 rounded-3xl border-dashed border-2 border-slate-200 dark:border-slate-800 bg-white/30 dark:bg-transparent text-primary-600 dark:text-slate-400 hover:bg-primary-50 dark:hover:bg-slate-800/50 hover:border-primary-200 dark:hover:border-slate-700 transition-all font-black text-xs uppercase tracking-widest"
+                                    className="w-full h-16 rounded-3xl border-dashed border-2 border-main bg-white/5 text-muted hover:bg-white/10 transition-all font-black text-xs uppercase tracking-widest"
                                 >
                                     <Plus className="w-4 h-4 mr-2" />
                                     Registrar Nuevo Ingreso
@@ -340,7 +361,7 @@ export const BudgetModule: React.FC = () => {
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     onSubmit={handleSaveIncome}
-                                    className="glass glass-border p-6 rounded-[2.5rem] space-y-4 shadow-luxury relative z-10"
+                                    className="bg-surface border border-main p-6 rounded-[2.5rem] space-y-4 shadow-2xl relative z-10"
                                 >
                                     <div className="flex justify-between items-center mb-2">
                                         <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
@@ -351,23 +372,26 @@ export const BudgetModule: React.FC = () => {
                                     <Input placeholder="Nombre (ej. Sueldo)" value={incName} onChange={e => setIncName(e.target.value)} autoFocus />
                                     <div className="flex gap-2">
                                         <Input type="number" placeholder="Monto" value={incAmount} onChange={e => setIncAmount(e.target.value)} />
-                                        <select
+                                        <Select
                                             value={incCurrency}
-                                            onChange={e => setIncCurrency(e.target.value as Currency)}
-                                            className="bg-white dark:bg-slate-900 rounded-[1.25rem] px-4 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-primary-500 outline-none h-12"
-                                        >
-                                            <option>UYU</option><option>USD</option>
-                                        </select>
+                                            onChange={val => setIncCurrency(val as Currency)}
+                                            options={[
+                                                { value: 'UYU', label: 'UYU' },
+                                                { value: 'USD', label: 'USD' }
+                                            ]}
+                                            className="w-28"
+                                        />
                                     </div>
                                     <div className="flex gap-2">
-                                        <select
+                                        <Select
                                             value={incType}
-                                            onChange={e => setIncType(e.target.value as IncomeType)}
-                                            className="flex-1 bg-white dark:bg-slate-900 rounded-[1.25rem] px-4 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-black text-[10px] uppercase tracking-widest focus:ring-2 focus:ring-primary-500 outline-none h-12"
-                                        >
-                                            <option value="fixed_date">Día Fijo (Mes)</option>
-                                            <option value="business_day">Día Hábil</option>
-                                        </select>
+                                            onChange={val => setIncType(val as IncomeType)}
+                                            options={[
+                                                { value: 'fixed_date', label: 'Día Fijo (Mes)' },
+                                                { value: 'business_day', label: 'Día Hábil' }
+                                            ]}
+                                            className="flex-1"
+                                        />
                                         <Input type="number" placeholder="Día" value={incDay} onChange={e => setIncDay(e.target.value)} className="w-24" />
                                     </div>
                                     <div className="flex gap-3 pt-4">
@@ -388,20 +412,20 @@ export const BudgetModule: React.FC = () => {
                                         <motion.div
                                             layout
                                             key={inc.id}
-                                            className="glass glass-border p-6 rounded-[2.5rem] shadow-sm flex justify-between items-center group hover:bg-white dark:hover:bg-slate-800 transition-all border-l-4 border-l-primary-500"
+                                            className="bg-surface-alt border border-main p-6 rounded-[2.5rem] shadow-sm flex justify-between items-center group hover:bg-white/5 transition-all border-l-4 border-l-sentry-liberate"
                                         >
                                             <div className="cursor-pointer flex-1" onClick={() => handleEditIncome(inc)}>
                                                 <h4 className="font-black text-slate-800 dark:text-white tracking-tight">{inc.name}</h4>
                                                 <div className="flex items-center gap-3 mt-1.5">
-                                                    <div className={`px-2 py-0.5 rounded-lg text-[9px] uppercase font-black tracking-widest ${isToday ? 'bg-primary-100 text-primary-700' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'}`}>
+                                                    <div className={`px-2 py-0.5 rounded-lg text-[9px] uppercase font-black tracking-widest ${isToday ? 'bg-sentry-liberate/10 text-sentry-liberate' : 'bg-background text-muted'}`}>
                                                         {inc.type === 'business_day' ? `${inc.dayValue}º Día Hábil` : `Día ${inc.dayValue}`}
                                                     </div>
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Cobro: {nextPayday.toLocaleDateString(settings.language, { day: 'numeric', month: 'short', weekday: 'short' })}</span>
+                                                    <span className="text-[10px] font-bold text-muted uppercase tracking-tight">Cobro: {nextPayday.toLocaleDateString(settings.language, { day: 'numeric', month: 'short', weekday: 'short' })}</span>
                                                 </div>
                                             </div>
                                             <div className="text-right flex items-center gap-4">
                                                 <div className="hidden sm:block">
-                                                    <p className="font-black text-primary-600 dark:text-primary-400 tracking-tighter">{inc.currency} {inc.amount}</p>
+                                                    <p className="font-black text-main tracking-tighter">{inc.currency} {inc.amount}</p>
                                                 </div>
                                                 <div className="flex items-center gap-1">
                                                     <button onClick={() => removeIncome(inc.id)} className="p-2.5 rounded-xl text-slate-300 hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all">
@@ -430,7 +454,7 @@ export const BudgetModule: React.FC = () => {
                                 <Button
                                     variant="ghost"
                                     onClick={() => { setEditingId(null); setShowForms(true); }}
-                                    className="w-full h-16 rounded-3xl border-dashed border-2 border-slate-200 dark:border-slate-800 bg-white/30 dark:bg-transparent text-primary-600 dark:text-slate-400 hover:bg-primary-50 dark:hover:bg-slate-800/50 hover:border-primary-200 dark:hover:border-slate-700 transition-all font-black text-xs uppercase tracking-widest"
+                                    className="w-full h-16 rounded-3xl border-dashed border-2 border-main bg-white/5 text-muted hover:bg-white/10 transition-all font-black text-xs uppercase tracking-widest"
                                 >
                                     <Plus className="w-4 h-4 mr-2" />
                                     Agendar Gasto Fijo
@@ -440,7 +464,7 @@ export const BudgetModule: React.FC = () => {
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     onSubmit={handleSaveExpense}
-                                    className="glass glass-border p-6 rounded-[2.5rem] space-y-4 shadow-luxury relative z-10"
+                                    className="bg-surface border border-main p-6 rounded-[2.5rem] space-y-4 shadow-2xl relative z-10"
                                 >
                                     <div className="flex justify-between items-center mb-2">
                                         <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
@@ -451,37 +475,41 @@ export const BudgetModule: React.FC = () => {
                                     <Input placeholder="Concepto (ej. Alquiler)" value={expName} onChange={e => setExpName(e.target.value)} autoFocus />
                                     <div className="flex gap-2">
                                         <Input type="number" placeholder="Monto" value={expAmount} onChange={e => setExpAmount(e.target.value)} />
-                                        <select
+                                        <Select
                                             value={expCurrency}
-                                            onChange={e => setExpCurrency(e.target.value as Currency)}
-                                            className="bg-white dark:bg-slate-900 rounded-[1.25rem] px-4 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-primary-500 outline-none h-12"
-                                        >
-                                            <option>UYU</option><option>USD</option>
-                                        </select>
+                                            onChange={val => setExpCurrency(val as Currency)}
+                                            options={[
+                                                { value: 'UYU', label: 'UYU' },
+                                                { value: 'USD', label: 'USD' }
+                                            ]}
+                                            className="w-28"
+                                        />
                                     </div>
                                     <div className="flex gap-2">
-                                        <select
+                                        <Select
                                             value={expCategory}
-                                            onChange={e => setExpCategory(e.target.value as ExpenseCategory)}
-                                            className="flex-1 bg-white dark:bg-slate-900 rounded-[1.25rem] px-4 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-black text-[10px] uppercase tracking-widest focus:ring-2 focus:ring-primary-500 outline-none h-12"
-                                        >
-                                            <option value="housing">Vivienda</option>
-                                            <option value="utilities">Servicios</option>
-                                            <option value="loans">Deudas</option>
-                                            <option value="subscription">Suscripción</option>
-                                            <option value="food">Alimentación</option>
-                                            <option value="education">Educación</option>
-                                            <option value="health">Salud</option>
-                                            <option value="other">Otros</option>
-                                        </select>
-                                        <select
+                                            onChange={val => setExpCategory(val as ExpenseCategory)}
+                                            options={[
+                                                { value: 'housing', label: 'Vivienda' },
+                                                { value: 'utilities', label: 'Servicios' },
+                                                { value: 'loans', label: 'Deudas' },
+                                                { value: 'subscription', label: 'Suscripción' },
+                                                { value: 'food', label: 'Alimentación' },
+                                                { value: 'education', label: 'Educación' },
+                                                { value: 'health', label: 'Salud' },
+                                                { value: 'other', label: 'Otros' }
+                                            ]}
+                                            className="flex-1"
+                                        />
+                                        <Select
                                             value={expPriority}
-                                            onChange={e => setExpPriority(e.target.value as ExpensePriority)}
-                                            className="flex-1 bg-white dark:bg-slate-900 rounded-[1.25rem] px-4 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-black text-[10px] uppercase tracking-widest focus:ring-2 focus:ring-primary-500 outline-none h-12"
-                                        >
-                                            <option value="vital">Vital (N1)</option>
-                                            <option value="subscription">Opcional (N2)</option>
-                                        </select>
+                                            onChange={val => setExpPriority(val as ExpensePriority)}
+                                            options={[
+                                                { value: 'vital', label: 'Vital (N1)' },
+                                                { value: 'subscription', label: 'Opcional (N2)' }
+                                            ]}
+                                            className="flex-1"
+                                        />
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Vence el día:</span>
@@ -501,49 +529,48 @@ export const BudgetModule: React.FC = () => {
                                     <motion.div
                                         layout
                                         key={exp.id}
-                                        className={`relative glass glass-border p-6 rounded-[2.5rem] shadow-sm flex justify-between items-center transition-all group overflow-hidden ${exp.isPaid ? 'opacity-50 grayscale' : ''
-                                            }`}
+                                        className={`relative bg-surface-alt border border-main p-6 rounded-[2.5rem] shadow-sm flex justify-between items-center transition-all group overflow-hidden ${exp.isPaid ? 'opacity-50 grayscale' : ''}`}
                                     >
                                         {/* Priority Indicator Strip */}
-                                        <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${exp.priority === 'vital' ? 'bg-red-500' : 'bg-orange-400'}`}></div>
+                                        <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${exp.priority === 'vital' ? 'bg-sentry-active' : 'bg-sentry-observe'}`}></div>
 
                                         <div className="flex items-center gap-4 pl-2 flex-1 cursor-pointer" onClick={() => handleEditExpense(exp)}>
                                             <button onClick={(e) => { e.stopPropagation(); toggleExpensePaid(exp.id); }} className="focus:outline-none transition-transform hover:scale-110">
                                                 {exp.isPaid
-                                                    ? <CheckCircle2 className="w-7 h-7 text-primary-500" />
-                                                    : <Circle className="w-7 h-7 text-slate-200 hover:text-primary-300" />
+                                                    ? <CheckCircle2 className="w-7 h-7 text-sentry-liberate" />
+                                                    : <Circle className="w-7 h-7 text-muted hover:text-main" />
                                                 }
                                             </button>
                                             <div>
-                                                <h4 className={`font-black tracking-tight ${exp.isPaid ? 'text-slate-400 line-through' : 'text-slate-800 dark:text-white'}`}>{exp.name}</h4>
+                                                <h4 className={`font-black tracking-tight ${exp.isPaid ? 'text-muted line-through' : 'text-main'}`}>{exp.name}</h4>
                                                 <div className="flex items-center gap-3 mt-1.5">
                                                     <div className="flex items-center gap-1.5">
-                                                        {exp.priority === 'vital' ? <Zap className="w-3 h-3 text-red-500" /> : <Coffee className="w-3 h-3 text-orange-400" />}
-                                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{getCategoryLabel(exp.category)}</span>
+                                                        {exp.priority === 'vital' ? <Zap className="w-3 h-3 text-sentry-active" /> : <Coffee className="w-3 h-3 text-sentry-observe" />}
+                                                        <span className="text-[9px] font-black text-muted uppercase tracking-widest">{getCategoryLabel(exp.category)}</span>
                                                     </div>
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Vence el {exp.dueDate}</span>
+                                                    <span className="text-[10px] font-bold text-muted uppercase tracking-tight">Vence el {exp.dueDate}</span>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div className="text-right flex items-center gap-4">
                                             <div className="hidden sm:block">
-                                                <p className="font-black text-slate-700 dark:text-slate-300 tracking-tighter">{exp.currency} {exp.amount}</p>
+                                                <p className="font-black text-main tracking-tighter">{exp.currency} {exp.amount}</p>
                                             </div>
                                             <div className="flex items-center gap-1">
-                                                <button onClick={() => removeFixedExpense(exp.id)} className="p-2.5 rounded-xl text-slate-300 hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all">
+                                                <button onClick={() => removeFixedExpense(exp.id)} className="p-2.5 rounded-xl text-muted hover:text-sentry-active hover:bg-sentry-active/10 transition-all">
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
                                             </div>
                                         </div>
                                     </motion.div>
                                 ))}
-                            </div>
-                        </motion.div>
-                    </AnimatePresence>
+                            </div >
+                        </motion.div >
+                    </AnimatePresence >
                 )}
-            </div>
+            </div >
 
-        </motion.div>
+        </motion.div >
     );
 };

@@ -32,15 +32,15 @@ export const RealitySimulator: React.FC<{ onClose: () => void }> = ({ onClose })
     const dailyBudget = pulse.initialDisposable / 30;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xl animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/60 backdrop-blur-xl animate-fade-in">
             <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="bg-white dark:bg-slate-800 w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden p-8 border border-white/20"
+                className="bg-surface w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden p-8 border border-main"
             >
                 <div className="flex justify-between items-center mb-8">
                     <div className="flex items-center gap-3">
-                        <div className="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl text-indigo-600">
+                        <div className="p-3 bg-sentry-liberate/10 rounded-2xl text-sentry-liberate">
                             <Zap className="w-6 h-6" />
                         </div>
                         <div>
@@ -71,14 +71,14 @@ export const RealitySimulator: React.FC<{ onClose: () => void }> = ({ onClose })
                         />
                         <div className="flex flex-col justify-end pb-1">
                             <span className="text-[10px] font-bold text-slate-400 uppercase mb-2">Frecuencia</span>
-                            <div className="h-12 bg-slate-50 dark:bg-slate-900 rounded-2xl flex items-center px-4 text-xs font-bold text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-800">
+                            <div className="h-12 bg-white/5 rounded-2xl flex items-center px-4 text-xs font-bold text-muted border border-main">
                                 Mensual
                             </div>
                         </div>
                     </div>
 
-                    <div className="p-6 rounded-[2rem] bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800">
-                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Impacto Proyectado</h4>
+                    <div className="p-6 rounded-[2rem] bg-surface border border-main">
+                        <h4 className="text-[10px] font-black text-muted uppercase tracking-widest mb-4">Impacto Proyectado</h4>
 
                         <div className="space-y-4">
                             <div className="flex justify-between items-center">
@@ -89,7 +89,7 @@ export const RealitySimulator: React.FC<{ onClose: () => void }> = ({ onClose })
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-xs font-bold text-slate-500">Drenaje Diario (Pulso)</span>
-                                <span className="font-black text-red-500">
+                                <span className="font-black text-sentry-active">
                                     -{new Intl.NumberFormat('es-UY', { style: 'currency', currency: settings.baseCurrency }).format(result.dailyImpact)}
                                 </span>
                             </div>

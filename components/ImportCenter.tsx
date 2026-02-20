@@ -232,7 +232,7 @@ export const ImportCenter: React.FC<ImportCenterProps> = ({ onClose }) => {
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
         link.setAttribute("href", url);
-        link.setAttribute("download", "flux_plantilla_importacion.csv");
+        link.setAttribute("download", "warden_plantilla_importacion.csv");
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -240,12 +240,12 @@ export const ImportCenter: React.FC<ImportCenterProps> = ({ onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-fade-in">
-            <div className="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-slate-100 dark:border-slate-700">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-background/80 backdrop-blur-md animate-fade-in">
+            <div className="bg-surface w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-main">
                 {/* Header */}
                 <div className="p-6 border-b border-main flex justify-between items-center bg-surface-alt">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-xl bg-primary-600 text-white shadow-lg shadow-primary-500/30">
+                        <div className="p-2 rounded-xl bg-main text-black shadow-lg">
                             <Database className="w-6 h-6" />
                         </div>
                         <div>
@@ -258,7 +258,7 @@ export const ImportCenter: React.FC<ImportCenterProps> = ({ onClose }) => {
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setStep(step === 'help' ? 'select' : 'help')}
-                            className={`p-2 rounded-full transition-all ${step === 'help' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600' : 'hover:bg-surface-alt text-muted'}`}
+                            className={`p-2 rounded-full transition-all ${step === 'help' ? 'bg-sentry-liberate/10 text-sentry-liberate' : 'hover:bg-surface-alt text-muted'}`}
                             title="Guía de Importación"
                         >
                             <HelpCircle className="w-6 h-6" />
@@ -322,7 +322,7 @@ export const ImportCenter: React.FC<ImportCenterProps> = ({ onClose }) => {
                                         </div>
                                         <button
                                             onClick={handleDownloadTemplate}
-                                            className="px-4 py-2 bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary-600 hover:text-white transition-all"
+                                            className="px-4 py-2 bg-sentry-liberate/10 text-sentry-liberate rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-main hover:text-black transition-all"
                                         >
                                             Bajar Plantilla
                                         </button>
@@ -342,8 +342,8 @@ export const ImportCenter: React.FC<ImportCenterProps> = ({ onClose }) => {
                                         <MappingSelect label="Moneda (Opcional)" value={mapping.currency} onChange={v => setMapping({ ...mapping, currency: v })} options={Object.keys(rawTransactions[0] || {})} />
                                     </div>
                                     <button
-                                        onClick={applyMapping}
-                                        className="w-full mt-4 py-3 bg-primary-600 text-white rounded-2xl font-black tracking-tight hover:bg-primary-700 transition-all shadow-lg shadow-primary-500/20"
+                                        onClick={() => applyMapping()}
+                                        className="w-full mt-4 py-3 bg-main text-black rounded-2xl font-black tracking-tight hover:bg-white/90 transition-all shadow-lg shadow-white/10"
                                     >
                                         Generar Vista Previa
                                     </button>
@@ -362,7 +362,7 @@ export const ImportCenter: React.FC<ImportCenterProps> = ({ onClose }) => {
                                             </p>
                                         </div>
                                         {duplicateIndices.length > 0 && (
-                                            <div className="flex items-center gap-2 px-3 py-1 bg-orange-500/10 border border-orange-500/20 rounded-full text-orange-500 text-[10px] font-black uppercase tracking-tighter">
+                                            <div className="flex items-center gap-2 px-3 py-1 bg-sentry-active/10 border border-sentry-active/20 rounded-full text-sentry-active text-[10px] font-black uppercase tracking-tighter">
                                                 <ShieldAlert className="w-3.5 h-3.5" />
                                                 {duplicateIndices.length} Posibles Duplicados Detectados
                                             </div>
@@ -388,11 +388,11 @@ export const ImportCenter: React.FC<ImportCenterProps> = ({ onClose }) => {
                                                         }`}
                                                 >
                                                     <div className="flex items-center gap-4">
-                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${exp.selected ? 'bg-primary-600 border-primary-600 text-white' : 'bg-transparent border-slate-300 dark:border-slate-600'
+                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${exp.selected ? 'bg-sentry-liberate border-sentry-liberate text-white' : 'bg-transparent border-white/10'
                                                             }`}>
                                                             {exp.selected && <CheckCircle2 className="w-3.5 h-3.5" />}
                                                         </div>
-                                                        <div className={`p-3 rounded-2xl ${exp.selected ? 'bg-primary-50 dark:bg-primary-900/40 text-primary-600' : 'bg-slate-100 dark:bg-slate-700 text-slate-400'}`}>
+                                                        <div className={`p-3 rounded-2xl ${exp.selected ? 'bg-sentry-liberate/10 text-sentry-liberate' : 'bg-white/5 text-muted'}`}>
                                                             <Icon className="w-5 h-5" />
                                                         </div>
                                                         <div>
@@ -427,7 +427,7 @@ export const ImportCenter: React.FC<ImportCenterProps> = ({ onClose }) => {
                                         <button
                                             onClick={handleConfirmImport}
                                             disabled={processedExpenses.filter(e => e.selected).length === 0}
-                                            className="flex-[2] py-4 bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-2xl font-black tracking-tight hover:bg-primary-700 transition-all shadow-xl shadow-primary-600/20"
+                                            className="flex-[2] py-4 bg-sentry-liberate disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-2xl font-black tracking-tight hover:bg-sentry-liberate/90 transition-all shadow-xl shadow-sentry-liberate/20"
                                         >
                                             Confirmar e Inyectar
                                         </button>

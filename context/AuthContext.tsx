@@ -9,7 +9,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     // Phase 1: Check for persisted session in localStorage
-    const storedUser = localStorage.getItem('flux_auth_user');
+    // Warden Migration: Check for warden key first, fallback to flux
+    let storedUser = localStorage.getItem('warden_auth_user');
+    if (!storedUser) {
+      storedUser = localStorage.getItem('flux_auth_user');
+    }
+
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
@@ -31,7 +36,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             provider: 'local'
           };
           setUser(mockUser);
-          localStorage.setItem('flux_auth_user', JSON.stringify(mockUser));
+          localStorage.setItem('warden_auth_user', JSON.stringify(mockUser));
           resolve();
         } else {
           reject(new Error("Invalid credentials"));
@@ -61,7 +66,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             provider: 'local'
           };
           setUser(mockUser);
-          localStorage.setItem('flux_auth_user', JSON.stringify(mockUser));
+          localStorage.setItem('warden_auth_user', JSON.stringify(mockUser));
           resolve();
         } else {
           reject(new Error("Please fill in all fields"));
@@ -104,19 +109,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('warden_auth_user');
     localStorage.removeItem('flux_auth_user');
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      isAuthenticated: !!user, 
-      isLoading, 
-      login, 
+    <AuthContext.Provider value={{
+      user,
+      isAuthenticated: !!user,
+      isLoading,
+      login,
       register,
       resetPassword,
       loginWithGoogle,
-      logout 
+      logout
     }}>
       {children}
     </AuthContext.Provider>

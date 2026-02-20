@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../context/StoreContext';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
+import { Select } from './ui/Select';
 import { Debt, Currency } from '../types';
 import { sortDebts } from '../utils/finance';
 import {
@@ -116,8 +117,8 @@ export const DebtModule: React.FC = () => {
                     <button
                         onClick={() => updateData({ paymentStrategy: 'snowball' })}
                         className={`p-4 rounded-2xl flex flex-col items-center gap-2 border transition-all duration-300 ${data.paymentStrategy === 'snowball'
-                            ? 'border-primary-500 bg-white dark:bg-slate-800 text-primary-600 shadow-luxury'
-                            : 'border-transparent bg-slate-100 dark:bg-slate-900/50 text-slate-400'
+                            ? 'border-sentry-liberate bg-surface text-sentry-liberate shadow-luxury'
+                            : 'border-transparent bg-white/5 text-muted'
                             }`}
                     >
                         <Snowflake className={`w-6 h-6 transition-transform duration-500 ${data.paymentStrategy === 'snowball' ? 'scale-110' : ''}`} />
@@ -126,8 +127,8 @@ export const DebtModule: React.FC = () => {
                     <button
                         onClick={() => updateData({ paymentStrategy: 'avalanche' })}
                         className={`p-4 rounded-2xl flex flex-col items-center gap-2 border transition-all duration-300 ${data.paymentStrategy === 'avalanche'
-                            ? 'border-orange-500 bg-white dark:bg-slate-800 text-orange-600 shadow-luxury'
-                            : 'border-transparent bg-slate-100 dark:bg-slate-900/50 text-slate-400'
+                            ? 'border-sentry-active bg-surface text-sentry-active shadow-luxury'
+                            : 'border-transparent bg-white/5 text-muted'
                             }`}
                     >
                         <TrendingDown className={`w-6 h-6 transition-transform duration-500 ${data.paymentStrategy === 'avalanche' ? 'scale-110' : ''}`} />
@@ -138,7 +139,7 @@ export const DebtModule: React.FC = () => {
                 {/* Strategy Explanation */}
                 <motion.div
                     layout
-                    className="bg-slate-50 dark:bg-slate-900/50 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 flex gap-4 items-start"
+                    className="bg-surface p-5 rounded-3xl border border-main flex gap-4 items-start"
                 >
                     <div className={`p-2 rounded-full flex-shrink-0 ${data.paymentStrategy === 'snowball' ? 'bg-primary-50 text-primary-500' : 'bg-orange-50 text-orange-500'}`}>
                         <Info className="w-4 h-4" />
@@ -171,9 +172,9 @@ export const DebtModule: React.FC = () => {
                             <Button
                                 variant="ghost"
                                 onClick={() => { resetForm(); setShowForm(true); }}
-                                className="w-full h-16 rounded-[2rem] border-dashed border-2 border-slate-200 dark:border-slate-800 bg-white/30 dark:bg-transparent text-primary-600 dark:text-slate-400 hover:bg-primary-50 dark:hover:bg-slate-800 transition-all font-black text-xs uppercase tracking-widest"
+                                className="w-full h-16 rounded-3xl border-dashed border-2 border-main bg-white/5 text-muted hover:bg-white/10 transition-all font-black text-xs uppercase tracking-widest"
                             >
-                                <Plus className="w-5 h-5 mr-2" /> Registrar Nueva Deuda
+                                <Plus className="w-4 h-4 mr-2" /> Registrar Nueva Deuda
                             </Button>
                         </motion.div>
                     ) : (
@@ -193,13 +194,15 @@ export const DebtModule: React.FC = () => {
 
                             <div className="grid grid-cols-2 gap-3">
                                 <Input placeholder="Monto Total" type="number" value={totalAmount} onChange={e => setTotalAmount(e.target.value)} />
-                                <select
+                                <Select
                                     value={currency}
-                                    onChange={e => setCurrency(e.target.value as Currency)}
-                                    className="h-12 bg-white dark:bg-slate-900 rounded-[1.25rem] px-4 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-primary-500 outline-none"
-                                >
-                                    <option>UYU</option><option>USD</option>
-                                </select>
+                                    onChange={val => setCurrency(val as Currency)}
+                                    options={[
+                                        { value: 'UYU', label: 'UYU' },
+                                        { value: 'USD', label: 'USD' }
+                                    ]}
+                                    className="h-12"
+                                />
                             </div>
 
                             <div className="glass glass-border p-5 rounded-[1.75rem] space-y-4">
@@ -241,10 +244,10 @@ export const DebtModule: React.FC = () => {
                                 key={debt.id}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="glass glass-border p-8 rounded-[2.5rem] shadow-sm hover:bg-white dark:hover:bg-slate-800 transition-all group relative overflow-hidden"
+                                className="glass glass-border p-8 rounded-[2.5rem] shadow-sm hover:bg-white/5 transition-all group relative overflow-hidden"
                             >
                                 {/* Priority Indicator */}
-                                <div className={`absolute top-0 right-0 px-4 py-1.5 rounded-bl-[1.25rem] text-[9px] font-black uppercase tracking-widest ${index === 0 ? 'bg-primary-500 text-white shadow-lg' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
+                                <div className={`absolute top-0 right-0 px-4 py-1.5 rounded-bl-[1.25rem] text-[9px] font-black uppercase tracking-widest ${index === 0 ? 'bg-sentry-active text-white shadow-lg' : 'bg-surface text-muted border-l border-b border-main'}`}>
                                     {index === 0 ? 'Prioridad #1' : `#${index + 1}`}
                                 </div>
 
@@ -268,12 +271,12 @@ export const DebtModule: React.FC = () => {
 
                                 {/* Progress Bar Container */}
                                 <div className="space-y-2 mb-6">
-                                    <div className="w-full bg-slate-100 dark:bg-slate-900/50 rounded-full h-3 overflow-hidden p-0.5 border border-slate-50 dark:border-slate-800">
+                                    <div className="w-full bg-white/5 rounded-full h-3 overflow-hidden p-0.5 border border-main">
                                         <motion.div
                                             initial={{ width: 0 }}
                                             animate={{ width: `${progress}%` }}
                                             transition={{ duration: 1, ease: "easeOut" }}
-                                            className={`h-full rounded-full ${index === 0 ? 'bg-gradient-to-r from-primary-400 to-primary-600 shadow-lg shadow-primary-500/30' : 'bg-slate-400 dark:bg-slate-600'}`}
+                                            className={`h-full rounded-full ${index === 0 ? 'bg-sentry-liberate shadow-lg shadow-sentry-liberate/20' : 'bg-muted'}`}
                                         ></motion.div>
                                     </div>
                                     <div className="flex justify-between items-center px-1">
@@ -289,10 +292,10 @@ export const DebtModule: React.FC = () => {
                                         Libre: {getDebtFreedomDate(debt)}
                                     </div>
                                     <div className="flex gap-2">
-                                        <button onClick={() => handleEdit(debt)} className="p-3 rounded-2xl text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-all">
+                                        <button onClick={() => handleEdit(debt)} className="p-3 rounded-2xl text-muted hover:text-main hover:bg-white/5 transition-all">
                                             <Pencil className="w-4 h-4" />
                                         </button>
-                                        <button onClick={() => removeDebt(debt.id)} className="p-3 rounded-2xl text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all">
+                                        <button onClick={() => removeDebt(debt.id)} className="p-3 rounded-2xl text-muted hover:text-sentry-active hover:bg-sentry-active/5 transition-all">
                                             <Trash2 className="w-4 h-4" />
                                         </button>
                                     </div>

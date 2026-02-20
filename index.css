@@ -1,45 +1,37 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;600;700;900&display=swap');
 
 :root {
-    --primary: #10b981;
-    --primary-hover: #059669;
-    --bg-light: #f8fafc;
-    --bg-dark: #020617;
-    color-scheme: light dark;
+    color-scheme: dark;
+    --background: #0A0A0B;
+    --surface: #141416;
+    --main: #F5F5F7;
+    --muted: #8E8E93;
+    --sentry-active: #FF3B30;
+    --sentry-observe: #FF9500;
+    --sentry-liberate: #34C759;
+    --glass-bg: rgba(20, 20, 22, 0.85);
+    --border: rgba(245, 245, 247, 0.08);
 }
 
+/* Enforce dark regardless of system preference if needed, but root is already dark */
 body {
     font-family: 'Inter', sans-serif;
     overflow-x: hidden;
+    background-color: var(--background) !important;
+    color: var(--main);
+    letter-spacing: -0.02em;
+    -webkit-font-smoothing: antialiased;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-.font-heading {
-    font-family: 'Outfit', sans-serif;
-}
-
-/* Glassmorphism primitives */
+/* Warden: Dynamic Glassmorphism */
 .glass {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-}
-
-.dark .glass {
-    background: rgba(15, 23, 42, 0.7);
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
 }
 
 .glass-border {
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.dark .glass-border {
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
 }
 
 /* Animations */
@@ -69,73 +61,49 @@ h6,
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
+    background: rgba(245, 245, 247, 0.1);
     border-radius: 10px;
 }
 
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #1e293b;
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(245, 245, 247, 0.2);
 }
 
-/* Luxury shadows */
+/* Warden: Dynamic Shadows */
 .shadow-luxury {
-    box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-.dark .shadow-luxury {
-    box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.4);
-}
-
-/* Design Tokens Standard CSS (No @apply) */
+/* Unified Design Tokens */
 .text-main {
-    color: #1e293b;
-}
-
-.dark .text-main {
-    color: #f8fafc;
+    color: var(--main);
 }
 
 .text-muted {
-    color: #64748b;
+    color: var(--muted);
 }
 
-.dark .text-muted {
-    color: #94a3b8;
+.text-sentry-active {
+    color: var(--sentry-active);
 }
 
-.text-accent {
-    color: #059669;
-}
-
-.dark .text-accent {
-    color: #34d399;
+.text-sentry-observe {
+    color: var(--sentry-observe);
 }
 
 .bg-surface {
-    background-color: #ffffff;
+    background-color: var(--surface);
 }
 
-.dark .bg-surface {
-    background-color: #1e293b;
-}
-
-.bg-surface-alt {
-    background-color: #f8fafc;
-}
-
-.dark .bg-surface-alt {
-    background-color: rgba(15, 23, 42, 0.5);
+.bg-background {
+    background-color: var(--background);
 }
 
 .border-main {
-    border-color: #f1f5f9;
+    border-color: var(--border);
 }
 
-.dark .border-main {
-    border-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Premium Inputs & Selects - FORCED COLORS */
+/* Premium Inputs & Selects */
 .input-premium {
     width: 100%;
     padding: 0.75rem 1rem;
@@ -144,15 +112,14 @@ h6,
     font-size: 0.875rem;
     transition: all 0.2s;
     outline: none;
-    background-color: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    color: #1e293b !important;
+    background-color: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--main) !important;
 }
 
-.dark .input-premium {
-    background-color: #0f172a !important;
-    border-color: #334155 !important;
-    color: #ffffff !important;
+.input-premium:focus {
+    border-color: var(--sentry-active) !important;
+    box-shadow: 0 0 0 2px rgba(255, 59, 48, 0.1);
 }
 
 .select-premium {
@@ -162,31 +129,20 @@ h6,
     font-size: 0.875rem;
     outline: none;
     cursor: pointer;
-    background-color: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    color: #1e293b !important;
-}
-
-.dark .select-premium {
-    background-color: #0f172a !important;
-    border-color: #334155 !important;
-    color: #ffffff !important;
+    background-color: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--main) !important;
 }
 
 /* Specific styling for select options */
 select option {
-    background-color: #ffffff !important;
-    color: #1e293b !important;
-}
-
-.dark select option {
-    background-color: #1e293b !important;
-    color: #ffffff !important;
+    background-color: var(--surface) !important;
+    color: var(--main) !important;
 }
 
 /* Gradient text */
 .text-gradient {
-    background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, var(--sentry-liberate) 0%, var(--sentry-observe) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
