@@ -2,7 +2,8 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User, AuthState } from '../types';
 import {
   onAuthStateChanged,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -17,6 +18,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Handle redirect result
+    getRedirectResult(auth).catch((error) => {
+      console.error("Error al procesar el redireccionamiento de Google:", error);
+    });
+
     // Listen for real auth state changes
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
@@ -64,9 +70,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const loginWithGoogle = async () => {
     setIsLoading(true);
     try {
-      await signInWithPopup(auth, googleProvider);
-    } finally {
+      await signInWithRedirect(auth, googleProvider);
+    } catch (error) {
       setIsLoading(false);
+      throw error;
     }
   };
 
