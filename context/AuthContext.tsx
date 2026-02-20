@@ -17,6 +17,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  console.log('[AuthContext V3.1 REAL] Provider Initialized');
+
   useEffect(() => {
     // Handle redirect result
     getRedirectResult(auth).catch((error) => {
