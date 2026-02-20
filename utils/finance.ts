@@ -1,6 +1,28 @@
-import { Holiday, Income, FixedExpense, Currency, IncomeType, Debt, PaymentStrategy, VariableExpense, ExpenseCategory, ExpenseImportance, Language, SavingGoal } from '../types';
+import { Holiday, Income, FixedExpense, Currency, IncomeType, Debt, PaymentStrategy, VariableExpense, ExpenseCategory, ExpenseImportance, Language, SavingGoal, FinancialData, UserSettings } from '../types';
 
-// --- Localization Maps ---
+// --- Security & Sanitization Utilities ---
+
+/**
+ * Filtra caracteres peligrosos y tags HTML de un string para evitar XSS
+ * incluso si React escapa por defecto, esto mantiene los datos limpios en el estado.
+ */
+export const sanitizeText = (text: string): string => {
+  if (!text) return '';
+  return text
+    .replace(/<[^>]*>?/gm, '') // Elimina etiquetas HTML
+    .replace(/[<>]/g, '')     // Elimina caracteres < y >
+    .trim();
+};
+
+/**
+ * Asegura que un valor financiero sea un número positivo y válido.
+ * Previene errores de cálculo por NaN o valores negativos inyectados.
+ */
+export const validateFinancialInput = (value: any): number => {
+  const num = Number(value);
+  if (isNaN(num)) return 0;
+  return Math.abs(num);
+};
 
 export const getCategoryLabel = (cat: ExpenseCategory, lang: Language): string => {
   const map: Record<ExpenseCategory, { es: string, en: string }> = {
@@ -262,4 +284,214 @@ export const calculateRealHourlyRate = (
 
   if (totalHours === 0) return 0;
   return monthlyNetIncome / totalHours;
+};
+
+// --- Flux Auditor: Intelligent Insights ---
+
+export interface Insight {
+  id: string;
+  type: 'alert' | 'tip' | 'success' | 'info';
+  title: string;
+  message: string;
+  icon: string;
+}
+
+export const generateDailyInsights = (
+  data: FinancialData,
+  settings: UserSettings,
+  daysInMonth: number,
+  currentDayValue: number
+): Insight[] => {
+  const insights: Insight[] = [];
+  const today = new Date();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+
+  // 1. Pending Fixed Expenses Alert (Next 3 days)
+  const pendingFixed = (data.fixedExpenses || []).filter(e => !e.isPaid);
+  pendingFixed.forEach(exp => {
+    if (exp.dueDate >= currentDayValue && exp.dueDate <= currentDayValue + 3) {
+      insights.push({
+        id: `fixed-${exp.id}`,
+        type: 'alert',
+        title: 'Gasto Próximo',
+        message: `Mañana o pronto vence "${exp.name}" (${exp.currency} ${exp.amount}). ¡No olvides marcarlo como pago!`,
+        icon: 'AlertCircle'
+      });
+    }
+  });
+
+  // 2. Budget Health Insight (Burn rate)
+  const totalIncome = calculateTotalIncome(data.incomes, settings.baseCurrency, data.exchangeRate);
+  const fixedTotal = calculateTotalFixedExpenses(data.fixedExpenses, settings.baseCurrency, data.exchangeRate);
+  const peaceOfMindFund = totalIncome * (settings.peaceOfMindPercentage / 100);
+
+  // Disposable for the month (Initial)
+  const savingsContr = calculateTotalSavingsContribution(data.savingGoals, settings.baseCurrency, data.exchangeRate);
+  const initialDisposable = totalIncome - fixedTotal - peaceOfMindFund - savingsContr;
+
+  if (initialDisposable > 0) {
+    const todayISODate = getLocalISODate(today);
+    const spentThisMonth = (data.variableExpenses || [])
+      .filter(e => {
+        const d = new Date(e.date);
+        return d.getMonth() === currentMonth && d.getFullYear() === currentYear && e.date !== todayISODate;
+      })
+      .reduce((acc, e) => acc + convertToCurrency(e.amount, e.currency, settings.baseCurrency, data.exchangeRate), 0);
+
+    const burnRatePercent = (spentThisMonth / initialDisposable) * 100;
+    const monthProgressPercent = (currentDayValue / daysInMonth) * 100;
+
+    if (burnRatePercent > monthProgressPercent + 15) {
+      insights.push({
+        id: 'burn-rate-warning',
+        type: 'alert',
+        title: 'Ritmo de Gasto Alto',
+        message: `Has consumido el ${Math.round(burnRatePercent)}% de tu presupuesto, pero solo ha pasado el ${Math.round(monthProgressPercent)}% del mes. ¡Baja el ritmo!`,
+        icon: 'TrendingUp'
+      });
+    } else if (burnRatePercent < monthProgressPercent - 10) {
+      insights.push({
+        id: 'burn-rate-good',
+        type: 'success',
+        title: 'Excelente Control',
+        message: 'Tu ritmo de gasto está por debajo de lo previsto. ¡Sigue así!',
+        icon: 'ShieldCheck'
+      });
+    }
+  }
+
+  // 3. Peace of Mind Fund Status
+  if (settings.peaceOfMindPercentage > 0) { // Changed peaceOfMindPercentage to settings.peaceOfMindPercentage
+    // Small tip about the fund
+    insights.push({
+      id: 'peace-fund-tip',
+      type: 'info',
+      title: 'Protección Activada',
+      message: `Estás reservando el ${settings.peaceOfMindPercentage}% para tu pozo de paz mental. Muy bien.`,
+      icon: 'Shield'
+    });
+  }
+
+  // 4. Saving Goals Motivation
+  const goalsWithProgress = (data.savingGoals || []).filter(g => g.currentAmount >= g.targetAmount * 0.9 && g.currentAmount < g.targetAmount);
+  goalsWithProgress.forEach(g => {
+    insights.push({
+      id: `goal-near-${g.id}`,
+      type: 'success',
+      title: '¡Casi lo logras!',
+      message: `Tu cofre "${g.name}" está al ${Math.round((g.currentAmount / g.targetAmount) * 100)}%. ¡Falta muy poco!`,
+      icon: 'Rocket'
+    });
+  });
+
+  return insights.slice(0, 3); // Max 3 insights as planned
+};
+
+export const calculatePulseData = (
+  data: FinancialData,
+  settings: UserSettings,
+  daysInMonth: number,
+  currentDay: number
+) => {
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const baseCurrency = settings.baseCurrency;
+  const exchangeRate = data.exchangeRate;
+
+  // 1. Calcular el presupuesto inicial disponible para el mes
+  const totalIncome = calculateTotalIncome(data.incomes, baseCurrency, exchangeRate);
+  const fixedTotal = calculateTotalFixedExpenses(data.fixedExpenses, baseCurrency, exchangeRate);
+  const peaceOfMindFund = totalIncome * (settings.peaceOfMindPercentage / 100);
+  const savingsContr = calculateTotalSavingsContribution(data.savingGoals, baseCurrency, exchangeRate);
+  const initialDisposable = totalIncome - fixedTotal - peaceOfMindFund - savingsContr;
+
+  // 2. Generar puntos de datos diarios (Gasto Acumulado vs Ideal)
+  const burnPoints: { day: number, spent: number, ideal: number }[] = [];
+  let accumulatedSpent = 0;
+  const dailyIdeal = initialDisposable / daysInMonth;
+
+  for (let i = 1; i <= daysInMonth; i++) {
+    const dailyExpenses = (data.variableExpenses || [])
+      .filter(e => {
+        const d = new Date(e.date);
+        return d.getDate() === i && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+      })
+      .reduce((acc, e) => acc + convertToCurrency(e.amount, e.currency, baseCurrency, exchangeRate), 0);
+
+    accumulatedSpent += dailyExpenses;
+
+    // Solo agregamos puntos hasta el día actual para el gasto real
+    burnPoints.push({
+      day: i,
+      spent: i <= currentDay ? accumulatedSpent : 0,
+      ideal: dailyIdeal * i
+    });
+  }
+
+  return {
+    initialDisposable,
+    burnPoints,
+    currentSpent: accumulatedSpent,
+    remaining: initialDisposable - accumulatedSpent
+  };
+};
+
+export const predictDayZero = (
+  initialDisposable: number,
+  currentSpent: number,
+  currentDay: number,
+  daysInMonth: number
+): { day: number, isCritical: boolean } | null => {
+  if (currentDay === 0 || initialDisposable <= 0) return null;
+
+  const averageDailySpend = currentSpent / currentDay;
+  if (averageDailySpend <= 0) return { day: daysInMonth, isCritical: false };
+
+  const projectedDayZero = Math.floor(initialDisposable / averageDailySpend);
+  const day = Math.min(Math.max(1, projectedDayZero), daysInMonth + 1);
+
+  return {
+    day: day > daysInMonth ? daysInMonth : day,
+    isCritical: day <= daysInMonth
+  };
+};
+
+export const calculatePreviousMonthLeftover = (
+  data: FinancialData,
+  settings: UserSettings
+): number => {
+  const d = new Date();
+  // Ir al último día del mes pasado
+  const lastMonth = new Date(d.getFullYear(), d.getMonth(), 0);
+  const prevMonth = lastMonth.getMonth();
+  const prevYear = lastMonth.getFullYear();
+
+  const baseCurrency = settings.baseCurrency;
+  const exchangeRate = data.exchangeRate;
+
+  // 1. Ingresos del mes pasado
+  const totalIncome = data.incomes.reduce((acc, inc) =>
+    acc + convertToCurrency(inc.amount, inc.currency, baseCurrency, exchangeRate), 0);
+
+  // 2. Gastos fijos del mes pasado
+  const fixedTotal = data.fixedExpenses.reduce((acc, exp) =>
+    acc + convertToCurrency(exp.amount, exp.currency, baseCurrency, exchangeRate), 0);
+
+  // 3. Paz mental y ahorros configurados
+  const peaceOfMindFund = totalIncome * (settings.peaceOfMindPercentage / 100);
+  const savingsContr = calculateTotalSavingsContribution(data.savingGoals, baseCurrency, exchangeRate);
+
+  // 4. Gastos variables del mes pasado
+  const spentLastMonth = (data.variableExpenses || [])
+    .filter(e => {
+      const expDate = new Date(e.date);
+      return expDate.getMonth() === prevMonth && expDate.getFullYear() === prevYear;
+    })
+    .reduce((acc, e) => acc + convertToCurrency(e.amount, e.currency, baseCurrency, exchangeRate), 0);
+
+  // El sobrante es: Lo que quedó después de fijos y ahorros configurados - lo que se gastó en el día a día
+  const leftover = totalIncome - fixedTotal - peaceOfMindFund - savingsContr - spentLastMonth;
+
+  return Math.max(0, leftover);
 };

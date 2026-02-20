@@ -25,7 +25,7 @@ import {
     RawTransaction
 } from '../utils/importUtils';
 import { VariableExpense, Currency, ExpenseCategory, ExpenseImportance } from '../types';
-import { getLocalISODate, formatDateLabel, parseISODate } from '../utils/finance';
+import { getLocalISODate, formatDateLabel, parseISODate, sanitizeText, validateFinancialInput } from '../utils/finance';
 import {
     Utensils,
     Bus,
@@ -140,11 +140,7 @@ export const ImportCenter: React.FC<ImportCenterProps> = ({ onClose }) => {
             let amountRaw = String(raw[currentMapping.amount] || '0');
             // Detect if it's a negative amount (expense) or positive (income/return)
             const isNegative = amountRaw.includes('-') || amountRaw.includes('CR');
-            let amount = parseFloat(amountRaw.replace(/[^\d.,]/g, '').replace(',', '.'));
-
-            // In Flux, variable expenses are stored as positive numbers representing "spent" money
-            // but we should be careful with 0 or NaN
-            if (isNaN(amount)) amount = 0;
+            let amount = validateFinancialInput(amountRaw.replace(/[^\d.,]/g, '').replace(',', '.'));
 
             const dateRaw = String(raw[currentMapping.date] || '');
             let dateStr = getLocalISODate(new Date());
@@ -178,7 +174,7 @@ export const ImportCenter: React.FC<ImportCenterProps> = ({ onClose }) => {
                 }
             }
 
-            const description = raw[currentMapping.description] || 'Sin descripción';
+            const description = sanitizeText(String(raw[currentMapping.description] || 'Sin descripción'));
             const category = suggestCategory(description);
 
             return {
@@ -214,9 +210,9 @@ export const ImportCenter: React.FC<ImportCenterProps> = ({ onClose }) => {
         const finalExpenses = selectedExpenses.map(exp => ({
             ...exp,
             id: exp.id || crypto.randomUUID(),
-            amount: exp.amount || 0,
+            amount: validateFinancialInput(exp.amount),
             currency: exp.currency || settings.baseCurrency,
-            description: exp.description || '',
+            description: sanitizeText(exp.description || ''),
             category: exp.category || 'other',
             importance: exp.importance || 'flexible',
             isImpulsive: !!exp.isImpulsive,

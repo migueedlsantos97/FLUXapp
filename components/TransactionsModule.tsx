@@ -10,8 +10,15 @@ import {
     Trash2, Pencil, Filter, TrendingUp, AlertCircle, HeartPulse, Search,
     ChevronLeft, ChevronRight, Calendar, X, Check, ArrowRight
 } from 'lucide-react';
+import { PulseModule } from './PulseModule';
 
-export const TransactionsModule: React.FC = () => {
+interface TransactionsModuleProps {
+    pulseData: any;
+    dayZero: any;
+    formatMoneyProp: (amount: number) => string;
+}
+
+export const TransactionsModule: React.FC<TransactionsModuleProps> = ({ pulseData, dayZero, formatMoneyProp }) => {
     const { data, removeVariableExpense, updateVariableExpense, settings } = useStore();
 
     // State
@@ -131,6 +138,15 @@ export const TransactionsModule: React.FC = () => {
                     <ChevronRight className="w-6 h-6" />
                 </button>
             </div>
+
+            {/* Flux Pulse Visualization - Moved here to declutter Dashboard */}
+            <PulseModule
+                data={pulseData}
+                daysInMonth={new Date(currentYear, currentMonth + 1, 0).getDate()}
+                currentDay={new Date().getMonth() === currentMonth ? new Date().getDate() : (new Date() > currentDate ? new Date(currentYear, currentMonth + 1, 0).getDate() : 1)}
+                formatMoney={formatMoneyProp}
+                dayZero={dayZero}
+            />
 
             {/* 2. Analytics Bar Premium */}
             <div className="glass glass-border rounded-[2.5rem] p-8 shadow-luxury">

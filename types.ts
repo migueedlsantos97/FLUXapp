@@ -111,6 +111,7 @@ export interface FinancialData {
   hourlyRate: number; // Calculated dynamic value
   nominalBaseSalary: number; // Nueva Fase 7.5: Sueldo de referencia para Valor Hora
   nominalBaseCurrency: Currency; // Nueva Fase 7.5: Moneda del sueldo de referencia
+  lastSweptMonth?: string; // YYYY-MM
 }
 
 // Context States
@@ -185,4 +186,5 @@ export const INITIAL_DATA: FinancialData = {
   hourlyRate: 0,
   nominalBaseSalary: 0,
   nominalBaseCurrency: 'UYU',
+  lastSweptMonth: '',
 };

@@ -10,7 +10,8 @@ import { TransactionsModule } from './TransactionsModule';
 import { SavingsModule } from './SavingsModule';
 import { Calendar } from './ui/Calendar';
 import { URUGUAY_HOLIDAYS_2024 } from '../utils/holidays';
-import { calculateDailyBudget, calculateTotalIncome, calculateSequestration, convertToCurrency, calculateTodaySpend, getCategoryLabel, getImportanceLabel, calculateTotalSavingsContribution } from '../utils/finance';
+import { calculateDailyBudget, calculateTotalIncome, calculateSequestration, convertToCurrency, calculateTodaySpend, getCategoryLabel, getImportanceLabel, calculateTotalSavingsContribution, generateDailyInsights, calculatePulseData, predictDayZero, calculatePreviousMonthLeftover } from '../utils/finance';
+import { PulseModule } from './PulseModule';
 import { parseSmartInput } from '../utils/ai';
 import { GuardianMode, Currency, VariableExpense, ExpenseCategory } from '../types';
 import {
@@ -25,6 +26,7 @@ import {
     Sun,
     Moon,
     Check,
+    Sparkles,
     Briefcase,
     Zap,
     Bot,
@@ -37,11 +39,16 @@ import {
     Settings2,
     CalendarDays,
     Percent,
-    Coins,
-    ChevronRight,
     Database,
+    ArrowLeft,
     ArrowLeft as BackIcon,
-    Activity
+    Activity,
+    AlertCircle,
+    Rocket,
+    Shield,
+    Lightbulb,
+    ChevronRight,
+    Coins
 } from 'lucide-react';
 import { URUGUAY_NATIONAL_HOLIDAYS } from '../utils/holidays';
 
@@ -55,6 +62,12 @@ interface NavItemProps {
     onSetView: (view: any) => void;
 }
 
+interface TransactionsModuleProps {
+    pulseData: any;
+    dayZero: any;
+    formatMoney: (amount: number) => string;
+}
+
 interface DashboardHomeProps {
     remainingDailyAllowance: number;
     verdict: any;
@@ -65,6 +78,8 @@ interface DashboardHomeProps {
     formatMoney: (amount: number) => string;
     onSetView: (view: any) => void;
     setIsImportCenterOpen: (open: boolean) => void;
+    setIsProfileOpen: (open: boolean) => void;
+    insights: any[];
 }
 
 interface ProfileModalProps {
@@ -96,6 +111,104 @@ const NavItem: React.FC<NavItemProps> = ({ view, icon: Icon, label, currentView,
     </button>
 );
 
+const AuditorPanel: React.FC<{
+    insights: any[],
+    data: any,
+    formatMoney: (amount: number) => string,
+    settings: any,
+    onSetView: (view: any) => void,
+    setIsProfileOpen: (open: boolean) => void
+}> = ({ insights, data, formatMoney, settings, onSetView, setIsProfileOpen }) => {
+    const getIcon = (name: string, type: string) => {
+        const icons: any = { AlertCircle, ShieldCheck, Rocket, Shield, TrendingUp, Lightbulb };
+        const Icon = icons[name] || Lightbulb;
+        const colorClass = type === 'alert' ? 'text-red-500' : type === 'success' ? 'text-emerald-500' : 'text-primary-500';
+
+        return (
+            <div className={`p-2 rounded-xl flex-shrink-0 transition-all duration-500 group-hover:scale-110 ${type === 'alert' ? 'bg-red-50 dark:bg-red-900/20' :
+                type === 'success' ? 'bg-emerald-50 dark:bg-emerald-900/20' :
+                    'bg-primary-50 dark:bg-primary-900/20'
+                }`}>
+                <Icon className={`w-4 h-4 ${colorClass}`} />
+            </div>
+        );
+    };
+
+    const totalSavings = (data.savingGoals || []).reduce((acc: number, goal: any) =>
+        acc + convertToCurrency(goal.currentAmount, goal.currency, settings.baseCurrency, data.exchangeRate), 0
+    );
+
+    if (insights.length === 0) return null;
+
+    return (
+        <div className="glass glass-border rounded-[2.5rem] overflow-hidden shadow-luxury transition-all duration-500 hover:shadow-primary-500/5">
+            <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white shadow-lg shadow-primary-500/20">
+                            <Activity className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <h3 className="text-xs font-black uppercase tracking-widest text-slate-800 dark:text-white leading-none">Flux Auditor</h3>
+                            <p className="text-[9px] text-slate-400 font-bold uppercase mt-1 tracking-tighter">Inteligencia de Flujo</p>
+                        </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                        <button
+                            onClick={() => onSetView('transactions')}
+                            className="flex items-center gap-1 text-[9px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest hover:underline mb-1"
+                        >
+                            Ver Movimientos <ArrowLeft className="w-3 h-3 rotate-180" />
+                        </button>
+                        <div className="text-right">
+                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter mb-0.5">Fortaleza Total</p>
+                            <p className="text-sm font-black text-emerald-600 dark:text-emerald-400 leading-none">{formatMoney(totalSavings)}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="space-y-5">
+                    {insights.map((insight, idx) => (
+                        <motion.div
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: idx * 0.1 }}
+                            key={insight.id}
+                            className="flex gap-4 items-start group relative"
+                        >
+                            {getIcon(insight.icon, insight.type)}
+                            <div className="min-w-0 flex-1 pt-0.5">
+                                <div className="flex justify-between items-start gap-2">
+                                    <h4 className="text-[11px] font-black text-slate-800 dark:text-white leading-tight mb-1 group-hover:text-primary-500 transition-colors uppercase tracking-tight">{insight.title}</h4>
+                                    {insight.id.includes('peace') && (
+                                        <button
+                                            onClick={() => setIsProfileOpen(true)}
+                                            className="text-[9px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest hover:underline"
+                                        >
+                                            Ajustar
+                                        </button>
+                                    )}
+                                </div>
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed">{insight.message}</p>
+                            </div>
+                            {idx < insights.length - 1 && (
+                                <div className="absolute -bottom-2.5 left-14 right-0 h-px bg-slate-100 dark:bg-slate-800/50" />
+                            )}
+                        </motion.div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="bg-slate-50/50 dark:bg-slate-900/30 px-6 py-3 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Respaldo Reality</span>
+                <div className="flex gap-1">
+                    {[1, 2, 3].map(i => <div key={i} className="w-1 h-1 rounded-full bg-primary-500/30" />)}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const DashboardHome: React.FC<DashboardHomeProps> = ({
     remainingDailyAllowance,
     verdict,
@@ -105,7 +218,9 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
     settings,
     formatMoney,
     onSetView,
-    setIsImportCenterOpen
+    setIsImportCenterOpen,
+    setIsProfileOpen,
+    insights
 }) => (
     <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -243,6 +358,19 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
                     </div>
                 </div>
             </motion.div>
+
+
+            {/* Flux Auditor Insights */}
+            <div className="md:col-span-2">
+                <AuditorPanel
+                    insights={insights}
+                    data={data}
+                    formatMoney={formatMoney}
+                    settings={settings}
+                    onSetView={onSetView}
+                    setIsProfileOpen={setIsProfileOpen}
+                />
+            </div>
         </div>
 
         {/* Variable Expenses Feed */}
@@ -281,6 +409,79 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
         </div>
     </motion.div>
 );
+
+const SweepingModal: React.FC<{
+    amount: number,
+    formatMoney: (amount: number) => string,
+    savingGoals: any[],
+    onSweep: (goalId: string) => void,
+    onClose: () => void
+}> = ({ amount, formatMoney, savingGoals, onSweep, onClose }) => {
+    const [selectedGoal, setSelectedGoal] = React.useState(savingGoals.find(g => !g.targetAmount || g.currentAmount < g.targetAmount)?.id || savingGoals[0]?.id || '');
+
+    return (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-fade-in">
+            <motion.div
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                className="bg-white dark:bg-slate-900 w-full max-w-md rounded-[3rem] shadow-luxury overflow-hidden p-8 text-center relative"
+            >
+                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary-500 via-emerald-500 to-blue-500" />
+
+                <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600 animate-bounce">
+                    <Sparkles className="w-10 h-10" />
+                </div>
+
+                <h2 className="text-2xl font-black text-slate-800 dark:text-white mb-2 uppercase tracking-tight">¡Misión Cumplida!</h2>
+                <p className="text-slate-500 dark:text-slate-400 text-sm mb-8">
+                    Terminaste el mes pasado con un excedente de <span className="font-bold text-emerald-500">{formatMoney(amount)}</span>.
+                    No dejes que se diluya, ¡envíalo a un cofre!
+                </p>
+
+                <div className="space-y-3 mb-8 max-h-[300px] overflow-y-auto pr-2 scrollbar-premium">
+                    {savingGoals.map(goal => {
+                        const isFull = goal.targetAmount > 0 && goal.currentAmount >= goal.targetAmount;
+                        return (
+                            <button
+                                key={goal.id}
+                                disabled={isFull}
+                                onClick={() => setSelectedGoal(goal.id)}
+                                className={`w-full p-4 rounded-2xl border-2 transition-all flex items-center justify-between ${isFull ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-800' : selectedGoal === goal.id ? 'border-primary-500 bg-primary-50/50 dark:bg-primary-900/20' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200'}`}
+                            >
+                                <div className="flex items-center gap-3 text-left">
+                                    <span className="text-2xl">{goal.icon}</span>
+                                    <div>
+                                        <p className="text-xs font-black uppercase text-slate-800 dark:text-white leading-none mb-1">{goal.name}</p>
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none">
+                                            {isFull ? 'Meta Alcanzada 🎉' : `Cofre de ${goal.targetAmount > 0 ? 'Meta' : 'Ahorro General'}`}
+                                        </p>
+                                    </div>
+                                </div>
+                                {selectedGoal === goal.id && <div className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center text-white"><Check className="w-3 h-3" /></div>}
+                            </button>
+                        );
+                    })}
+                </div>
+
+                <div className="grid grid-cols-1 gap-3">
+                    <Button
+                        onClick={() => onSweep(selectedGoal)}
+                        className="h-14 rounded-2xl text-lg shadow-emerald-500/20"
+                        variant="primary"
+                    >
+                        Barrer a este Cofre
+                    </Button>
+                    <button
+                        onClick={onClose}
+                        className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 py-2"
+                    >
+                        Quizás luego (Dejar en cuenta)
+                    </button>
+                </div>
+            </motion.div>
+        </div>
+    );
+};
 
 const ProfileModal: React.FC<ProfileModalProps> = ({
     user,
@@ -576,14 +777,65 @@ export const Dashboard: React.FC = () => {
     const totalSavingsContribution = calculateTotalSavingsContribution(data.savingGoals || [], settings.baseCurrency, data.exchangeRate);
 
     const today = new Date();
-    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-    const currentDay = today.getDate();
-
     // Navigation & Modal States (Moved here for better organization)
     const [currentView, setCurrentView] = useState<'dashboard' | 'budget' | 'debts' | 'transactions' | 'savings'>('dashboard');
-    const [isConfessionOpen, setIsConfessionOpen] = useState(false);
     const [isImportCenterOpen, setIsImportCenterOpen] = useState(false);
+    const [isConfessionOpen, setIsConfessionOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isSweepingModalOpen, setIsSweepingModalOpen] = useState(false);
+    const [leftoverAmount, setLeftoverAmount] = useState(0);
+
+    // --- Detection for Smart Sweeping ---
+    useEffect(() => {
+        if (!data || !settings.setupComplete) return;
+
+        const d = new Date();
+        const lastMonth = new Date(d.getFullYear(), d.getMonth(), 0);
+        const prevMonthKey = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
+
+        // Si no hemos barrido el mes pasado aún
+        if (data.lastSweptMonth !== prevMonthKey) {
+            const leftover = calculatePreviousMonthLeftover(data, settings);
+            if (leftover > 100) { // Umbral mínimo 100 UYU
+                setLeftoverAmount(leftover);
+                setIsSweepingModalOpen(true);
+            } else {
+                // Si no hay sobrante suficiente, marcamos como barrido igual para no chequear más
+                updateData({ lastSweptMonth: prevMonthKey });
+            }
+        }
+    }, [data, settings.setupComplete]);
+
+    const handleSweep = (goalId: string) => {
+        const goal = data.savingGoals.find(g => g.id === goalId);
+        if (goal) {
+            let amountToSweep = leftoverAmount;
+            // Si la meta tiene un target y el monto actual + el sobrante excede el target, ajustar el monto a barrer
+            if (goal.targetAmount && (goal.currentAmount + leftoverAmount) > goal.targetAmount) {
+                amountToSweep = goal.targetAmount - goal.currentAmount;
+            }
+
+            const updatedGoals = data.savingGoals.map(g =>
+                g.id === goalId ? { ...g, currentAmount: g.currentAmount + amountToSweep } : g
+            );
+
+            const lastMonth = new Date();
+            lastMonth.setDate(0); // Último día del mes pasado
+            const prevMonthKey = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
+
+            updateData({
+                savingGoals: updatedGoals,
+                lastSweptMonth: prevMonthKey
+            });
+            setIsSweepingModalOpen(false);
+        }
+    };
+
+    // Flux Auditor Insights
+    const now = new Date();
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const currentDayValue = now.getDate();
+    const dailyInsights = generateDailyInsights(data, settings, daysInMonth, currentDayValue);
     const [activeSettingsView, setActiveSettingsView] = useState<'main' | 'holidays'>('main');
     const [confessionText, setConfessionText] = useState('');
     const [isImpulsive, setIsImpulsive] = useState(false);
@@ -595,7 +847,7 @@ export const Dashboard: React.FC = () => {
         totalSavingsContribution,
         settings.peaceOfMindPercentage,
         daysInMonth,
-        currentDay,
+        currentDayValue,
         data.variableExpenses || [],
         settings.baseCurrency,
         data.exchangeRate
@@ -843,8 +1095,10 @@ export const Dashboard: React.FC = () => {
                             data={data}
                             settings={settings}
                             formatMoney={formatMoney}
-                            onSetView={setCurrentView}
                             setIsImportCenterOpen={setIsImportCenterOpen}
+                            setIsProfileOpen={setIsProfileOpen}
+                            onSetView={setCurrentView}
+                            insights={dailyInsights}
                         />
                     )}
 
@@ -892,7 +1146,16 @@ export const Dashboard: React.FC = () => {
                                 <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Movimientos</h2>
                                 <p className="text-sm text-slate-500 dark:text-slate-400">Auditoría y Analítica de Gasto</p>
                             </div>
-                            <TransactionsModule />
+                            <TransactionsModule
+                                pulseData={calculatePulseData(data, settings, daysInMonth, currentDayValue)}
+                                dayZero={predictDayZero(
+                                    calculatePulseData(data, settings, daysInMonth, currentDayValue).initialDisposable,
+                                    calculatePulseData(data, settings, daysInMonth, currentDayValue).currentSpent,
+                                    currentDayValue,
+                                    daysInMonth
+                                )}
+                                formatMoneyProp={formatMoney}
+                            />
                         </motion.div>
                     )}
 
@@ -993,6 +1256,22 @@ export const Dashboard: React.FC = () => {
 
             {isImportCenterOpen && (
                 <ImportCenter onClose={() => setIsImportCenterOpen(false)} />
+            )}
+
+            {isSweepingModalOpen && (
+                <SweepingModal
+                    amount={leftoverAmount}
+                    formatMoney={formatMoney}
+                    savingGoals={data.savingGoals}
+                    onSweep={handleSweep}
+                    onClose={() => {
+                        const lastMonth = new Date();
+                        lastMonth.setDate(0);
+                        const prevMonthKey = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
+                        updateData({ lastSweptMonth: prevMonthKey });
+                        setIsSweepingModalOpen(false);
+                    }}
+                />
             )}
 
         </div>
