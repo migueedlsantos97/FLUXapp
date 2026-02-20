@@ -560,3 +560,28 @@ export const detectVampireExpenses = (
 
   return vampires.sort((a, b) => b.projection5Y - a.projection5Y);
 };
+
+/**
+ * Calcula la fecha mas lejana en la que el usuario sera libre de deudas.
+ */
+export const calculateUltimateFreedomDate = (debts: Debt[]): string => {
+  if (!debts || debts.length === 0) return '¡Ya eres libre! 🕊️';
+
+  let maxMonths = 0;
+  debts.forEach(d => {
+    const remaining = d.totalInstallments - d.paidInstallments;
+    if (remaining > maxMonths) maxMonths = remaining;
+  });
+
+  if (maxMonths <= 0) return '¡Ya eres libre! 🕊️';
+
+  const now = new Date();
+  now.setMonth(now.getMonth() + maxMonths);
+
+  const months = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
+
+  return `Libertad Total: ${months[now.getMonth()]} ${now.getFullYear()} 🕊️`;
+};

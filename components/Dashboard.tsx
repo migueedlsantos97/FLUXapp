@@ -11,7 +11,7 @@ import { TransactionsModule } from './TransactionsModule';
 import { SavingsModule } from './SavingsModule';
 import { Calendar } from './ui/Calendar';
 import { URUGUAY_HOLIDAYS_2024 } from '../utils/holidays';
-import { calculateDailyBudget, calculateTotalIncome, calculateSequestration, convertToCurrency, calculateTodaySpend, getCategoryLabel, getImportanceLabel, calculateTotalSavingsContribution, generateDailyInsights, calculatePulseData, predictDayZero, calculatePreviousMonthLeftover } from '../utils/finance';
+import { calculateDailyBudget, calculateTotalIncome, calculateSequestration, convertToCurrency, calculateTodaySpend, getCategoryLabel, getImportanceLabel, calculateTotalSavingsContribution, generateDailyInsights, calculatePulseData, predictDayZero, calculatePreviousMonthLeftover, detectVampireExpenses, calculateUltimateFreedomDate } from '../utils/finance';
 import { PulseModule } from './PulseModule';
 import { parseSmartInput } from '../utils/ai';
 import { GuardianMode, Currency, VariableExpense, ExpenseCategory } from '../types';
@@ -273,7 +273,15 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
                     <h1 className={`text-5xl sm:text-6xl font-black tracking-tighter ${remainingDailyAllowance < 0 ? 'text-red-500' : 'text-slate-800 dark:text-white'}`}>
                         {formatMoney(remainingDailyAllowance)}
                     </h1>
-                    <p className="text-xs text-slate-400 mt-2 font-medium">{verdict.sub}</p>
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 mt-2">
+                        <p className="text-xs text-slate-400 font-medium">{verdict.sub}</p>
+                        <div className="hidden sm:block w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 self-center"></div>
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50">
+                            <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-tight">
+                                {calculateUltimateFreedomDate(data.debts)}
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
