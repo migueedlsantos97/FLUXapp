@@ -1,9 +1,10 @@
-import React from 'react';
+import * as React from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { StoreProvider, useStore } from './context/StoreContext';
 import { LoginScreen } from './components/LoginScreen';
 import { OnboardingPremium } from './components/OnboardingPremium';
 import { Dashboard } from './components/Dashboard';
+import { SecurityOverlay } from './components/SecurityOverlay';
 
 // Inner component to handle routing based on auth state and setup status
 const AppContent = () => {
@@ -26,7 +27,12 @@ const AppContent = () => {
     return <OnboardingPremium />;
   }
 
-  return <Dashboard />;
+  return (
+    <>
+      <Dashboard />
+      <SecurityOverlay />
+    </>
+  );
 };
 
 const App: React.FC = () => {

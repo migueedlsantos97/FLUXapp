@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 import { Button } from './ui/Button';
 import { UserSettings, GuardianMode, Currency, Holiday, FinancialData } from '../types';
@@ -20,7 +21,8 @@ import {
     Coins,
     ShieldCheck,
     Clock,
-    Percent
+    Percent,
+    Lock as LockIcon
 } from 'lucide-react';
 
 export const OnboardingPremium: React.FC = () => {
@@ -193,6 +195,39 @@ export const OnboardingPremium: React.FC = () => {
                         <div className="p-4 bg-indigo-900 text-indigo-300 rounded-2xl"><Moon className="w-8 h-8" /></div>
                         <span className="font-black text-[10px] uppercase tracking-widest text-white">Modo Oscuro</span>
                     </button>
+                </div>
+            )
+        },
+        {
+            title: "Blindaje Pro",
+            subtitle: "Tus datos financieros, cifrados y bajo llave.",
+            component: (
+                <div className="space-y-6 max-w-md mx-auto text-center">
+                    <div className="w-16 h-16 bg-primary-50 dark:bg-primary-900/20 text-primary-600 rounded-2xl mx-auto flex items-center justify-center mb-4">
+                        <LockIcon className="w-8 h-8" />
+                    </div>
+                    <div className="space-y-2">
+                        <p className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-tight">Establecer PIN Flux Vault</p>
+                        <p className="text-[10px] text-slate-400 font-medium">Recomendado para proteger tu realidad en este dispositivo.</p>
+                    </div>
+
+                    <div className="flex justify-center gap-3">
+                        <input
+                            type="password"
+                            maxLength={4}
+                            placeholder="PIN (4 dígitos)"
+                            value={localSettings.vaultPIN || ''}
+                            onChange={(e) => handleUpdateSettings('vaultPIN', e.target.value.replace(/\D/g, ''))}
+                            className="w-48 text-center p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xl font-black font-mono tracking-[0.5em] focus:border-primary-500 outline-none"
+                        />
+                    </div>
+
+                    <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/30">
+                        <ShieldCheck className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                        <p className="text-[9px] text-amber-600 font-bold uppercase leading-tight text-left">
+                            Si estableces un PIN, tus datos se cifrarán localmente. No los pierdas.
+                        </p>
+                    </div>
                 </div>
             )
         }

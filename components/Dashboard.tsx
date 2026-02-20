@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ImportCenter } from './ImportCenter';
 import { useAuth } from '../context/AuthContext';
@@ -48,7 +49,8 @@ import {
     Shield,
     Lightbulb,
     ChevronRight,
-    Coins
+    Coins,
+    Lock as LockIcon
 } from 'lucide-react';
 import { URUGUAY_NATIONAL_HOLIDAYS } from '../utils/holidays';
 
@@ -80,6 +82,7 @@ interface DashboardHomeProps {
     setIsImportCenterOpen: (open: boolean) => void;
     setIsProfileOpen: (open: boolean) => void;
     insights: any[];
+    lockVault: () => void;
 }
 
 interface ProfileModalProps {
@@ -220,7 +223,8 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
     onSetView,
     setIsImportCenterOpen,
     setIsProfileOpen,
-    insights
+    insights,
+    lockVault
 }) => (
     <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -239,13 +243,24 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
                         {verdict.icon}
                         <span>{verdict.text}</span>
                     </div>
-                    <button
-                        onClick={() => setIsImportCenterOpen(true)}
-                        className="p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 hover:text-primary-500 transition-colors"
-                        title="Importar Datos"
-                    >
-                        <Database className="w-5 h-5" />
-                    </button>
+                    <div className="flex gap-2">
+                        {settings.vaultPIN && (
+                            <button
+                                onClick={() => lockVault()}
+                                className="p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 hover:text-primary-500 transition-colors"
+                                title="Bloquear Bóveda"
+                            >
+                                <Shield className="w-5 h-5" />
+                            </button>
+                        )}
+                        <button
+                            onClick={() => setIsImportCenterOpen(true)}
+                            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 hover:text-primary-500 transition-colors"
+                            title="Importar Datos"
+                        >
+                            <Database className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
 
                 <div className="text-center sm:text-left py-2">
@@ -722,6 +737,56 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                     </select>
                                 </div>
                             </div>
+
+                            {/* --- SEGURIDAD (VAULT) --- */}
+                            <div>
+                                <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2">
+                                    <Shield className="w-3.5 h-3.5" /> Seguridad (Flux Vault)
+                                </h4>
+                                <div className="p-4 rounded-xl border border-main bg-white dark:bg-slate-800/50">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400">
+                                                <LockIcon className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-main">PIN de Acceso</p>
+                                                <p className="text-[10px] text-muted">Protege tus datos cifrados</p>
+                                            </div>
+                                        </div>
+                                        <div className={`px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${settings.vaultPIN ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
+                                            {settings.vaultPIN ? 'Activo' : 'Inactivo'}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="password"
+                                            maxLength={4}
+                                            placeholder={settings.vaultPIN ? "****" : "Nuevo PIN"}
+                                            onChange={(e) => {
+                                                const val = e.target.value.replace(/\D/g, '');
+                                                if (val.length === 4) {
+                                                    updateSettings({ vaultPIN: val });
+                                                    e.target.value = '';
+                                                }
+                                            }}
+                                            className="input-premium flex-1 text-center font-mono tracking-widest"
+                                        />
+                                        {settings.vaultPIN && (
+                                            <button
+                                                onClick={() => updateSettings({ vaultPIN: undefined })}
+                                                className="px-3 py-2 rounded-xl bg-red-50 dark:bg-red-900/10 text-red-500 text-[10px] font-black uppercase tracking-widest"
+                                            >
+                                                Quitar
+                                            </button>
+                                        )}
+                                    </div>
+                                    <p className="mt-3 text-[9px] text-slate-400 leading-tight italic">
+                                        * El PIN cifra tus datos localmente. Flux se bloqueará cada vez que reinicies la app.
+                                    </p>
+                                </div>
+                            </div>
                         </>
                     ) : (
                         <div className="animate-fade-in">
@@ -752,7 +817,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
 
 export const Dashboard: React.FC = () => {
     const { user, logout } = useAuth();
-    const { settings, data, updateSettings, updateData, addVariableExpense } = useStore();
+    const { settings, data, updateSettings, updateData, addVariableExpense, lockVault } = useStore();
 
     const formatMoney = (amount: number) => {
         return new Intl.NumberFormat(settings.language, {
@@ -1099,6 +1164,7 @@ export const Dashboard: React.FC = () => {
                             setIsProfileOpen={setIsProfileOpen}
                             onSetView={setCurrentView}
                             insights={dailyInsights}
+                            lockVault={lockVault}
                         />
                     )}
 

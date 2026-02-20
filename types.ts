@@ -28,6 +28,7 @@ export interface UserSettings {
   guardianMode: GuardianMode;
   customHolidays: Holiday[];
   peaceOfMindPercentage: number; // Porcentaje de ahorro para fondo de paz
+  vaultPIN?: string; // PIN de seguridad cifrado (hash simple)
 }
 
 export type IncomeType = 'fixed_date' | 'business_day';
@@ -161,6 +162,12 @@ export interface StoreState {
   removeSavingGoal: (id: string) => void;
 
   syncData: () => Promise<void>;
+
+  // Security Actions
+  vaultIsLocked: boolean;
+  setVaultPIN: (pin: string | null) => void;
+  unlockVault: (pin: string) => boolean;
+  lockVault: () => void;
 }
 
 export const DEFAULT_SETTINGS: UserSettings = {

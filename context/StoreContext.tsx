@@ -1,8 +1,37 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
+import * as React from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { StoreState, UserSettings, FinancialData, DEFAULT_SETTINGS, INITIAL_DATA, Income, FixedExpense, Debt, VariableExpense, SavingGoal } from '../types';
 import { useAuth } from './AuthContext';
 import { calculateRealHourlyRate, calculateTotalIncome, calculateTotalFixedExpenses } from '../utils/finance';
 import { getHolidays } from '../utils/holidays';
+
+// --- Vault Encryption Helpers ---
+// Usamos un cifrado simétrico simple basado en el PIN para proteger los datos en localStorage.
+const encrypt = (data: string, pin: string): string => {
+  const textToChars = (text: string) => text.split('').map(c => c.charCodeAt(0));
+  const byteHex = (n: any) => ("0" + Number(n).toString(16)).slice(-2);
+  const applySaltToChar = (code: any) => textToChars(pin).reduce((a, b) => a ^ b, code);
+
+  return data.split('')
+    .map(textToChars)
+    .map(applySaltToChar)
+    .map(byteHex)
+    .join('');
+};
+
+const decrypt = (encoded: string, pin: string): string => {
+  const textToChars = (text: string) => text.split('').map(c => c.charCodeAt(0));
+  const applySaltToChar = (code: any) => textToChars(pin).reduce((a, b) => a ^ b, code);
+
+  const matches = encoded.match(/.{1,2}/g);
+  if (!matches) return '';
+
+  return matches
+    .map(hex => parseInt(hex, 16))
+    .map(applySaltToChar)
+    .map(charCode => String.fromCharCode(charCode))
+    .join('');
+};
 
 const StoreContext = createContext<StoreState | undefined>(undefined);
 
@@ -11,6 +40,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [data, setData] = useState<FinancialData>(INITIAL_DATA);
   const [isStoreLoaded, setIsStoreLoaded] = useState(false);
+  const [vaultIsLocked, setVaultIsLocked] = useState(false);
 
   console.log('[StoreContext] Provider rendering. isStoreLoaded:', isStoreLoaded, 'user:', user?.id);
 
@@ -18,12 +48,29 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   useEffect(() => {
     const loadLocalData = () => {
       const storageKeySuffix = user?.id || 'guest';
-      const savedSettings = localStorage.getItem(`flux_settings_${storageKeySuffix}`);
-      const savedData = localStorage.getItem(`flux_data_${storageKeySuffix}`);
+      const savedSettingsRaw = localStorage.getItem(`flux_settings_${storageKeySuffix}`);
+      const savedDataRaw = localStorage.getItem(`flux_data_${storageKeySuffix}`);
 
-      if (savedSettings) setSettings(prev => ({ ...prev, ...JSON.parse(savedSettings) }));
+      if (savedSettingsRaw) {
+        const parsedSettings = JSON.parse(savedSettingsRaw) as UserSettings;
+        setSettings(prev => ({ ...prev, ...parsedSettings }));
 
-      if (savedData) setData(prev => ({ ...prev, ...JSON.parse(savedData) }));
+        // Si hay un PIN configurado, bloqueamos la bóveda al iniciar
+        if (parsedSettings.vaultPIN) {
+          setVaultIsLocked(true);
+
+          // Intentamos descifrar los datos financieros si están presentes
+          if (savedDataRaw && savedDataRaw.startsWith('vault:')) {
+            // Los datos están cifrados, no los cargamos hasta que se desbloquee
+            console.log('[Vault] Data is encrypted. Waiting for PIN.');
+          } else if (savedDataRaw) {
+            // Migración: Si hay PIN pero los datos no están cifrados, los cargamos
+            setData(prev => ({ ...prev, ...JSON.parse(savedDataRaw) }));
+          }
+        } else if (savedDataRaw) {
+          setData(prev => ({ ...prev, ...JSON.parse(savedDataRaw) }));
+        }
+      }
 
       setIsStoreLoaded(true);
     };
@@ -36,9 +83,18 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     if (isStoreLoaded) {
       const storageKeySuffix = user?.id || 'guest';
       localStorage.setItem(`flux_settings_${storageKeySuffix}`, JSON.stringify(settings));
-      localStorage.setItem(`flux_data_${storageKeySuffix}`, JSON.stringify(data));
+
+      // Si la bóveda está bloqueada, no sobreescribimos los datos cifrados con el estado parcial
+      if (vaultIsLocked) return;
+
+      let dataToSave = JSON.stringify(data);
+      if (settings.vaultPIN) {
+        dataToSave = 'vault:' + encrypt(dataToSave, settings.vaultPIN);
+      }
+
+      localStorage.setItem(`flux_data_${storageKeySuffix}`, dataToSave);
     }
-  }, [settings, data, user, isStoreLoaded]);
+  }, [settings, data, user, isStoreLoaded, vaultIsLocked]);
 
   // GLOBAL THEME APPLICATION
   useEffect(() => {
@@ -200,6 +256,39 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     console.log("Synced.");
   };
 
+  // --- VAULT ACTIONS ---
+  const setVaultPIN = (pin: string | null) => {
+    updateSettings({ vaultPIN: pin || undefined });
+  };
+
+  const unlockVault = (pin: string): boolean => {
+    if (pin === settings.vaultPIN) {
+      // Intentar recuperar datos cifrados de localStorage
+      const storageKeySuffix = user?.id || 'guest';
+      const savedDataRaw = localStorage.getItem(`flux_data_${storageKeySuffix}`);
+
+      if (savedDataRaw && savedDataRaw.startsWith('vault:')) {
+        try {
+          const decrypted = decrypt(savedDataRaw.replace('vault:', ''), pin);
+          setData(JSON.parse(decrypted));
+        } catch (e) {
+          console.error('[Vault] Decryption failed', e);
+          return false;
+        }
+      }
+
+      setVaultIsLocked(false);
+      return true;
+    }
+    return false;
+  };
+
+  const lockVault = () => {
+    if (settings.vaultPIN) {
+      setVaultIsLocked(true);
+    }
+  };
+
   return (
     <StoreContext.Provider value={{
       settings,
@@ -223,7 +312,11 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       addSavingGoal,
       updateSavingGoal,
       removeSavingGoal,
-      syncData
+      syncData,
+      vaultIsLocked,
+      setVaultPIN,
+      unlockVault,
+      lockVault
     }}>
       {children}
     </StoreContext.Provider>
