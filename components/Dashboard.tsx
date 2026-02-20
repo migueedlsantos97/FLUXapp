@@ -205,12 +205,6 @@ const AuditorPanel: React.FC<{
                 </div>
             </div>
 
-            <div className="bg-slate-50/50 dark:bg-slate-900/30 px-6 py-3 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Respaldo Reality</span>
-                <div className="flex gap-1">
-                    {[1, 2, 3].map(i => <div key={i} className="w-1 h-1 rounded-full bg-primary-500/30" />)}
-                </div>
-            </div>
         </div>
     );
 };
@@ -649,7 +643,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                 <Coins className="w-5 h-5" />
                                             </div>
                                             <div className="flex-1">
-                                                <p className="text-sm font-bold text-main">Sueldo Nominal Base</p>
+                                                <p className="text-sm font-bold text-main">Sueldo liquido base</p>
                                                 <p className="text-[10px] text-muted">Valor/hr actual: {formatMoney(data.hourlyRate)}</p>
                                             </div>
                                         </div>
@@ -705,7 +699,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                 <g.icon className="w-4 h-4" />
                                             </div>
                                             <div className="flex-1">
-                                                <p className={`text-xs font-bold ${settings.guardianMode === g.id ? 'text-primary-900 dark:text-primary-100' : 'text-slate-700 dark:text-slate-300'}`}>{g.title}</p>
+                                                <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{g.title}</p>
                                                 <p className="text-[10px] text-slate-400 font-medium">{g.desc}</p>
                                             </div>
                                             {settings.guardianMode === g.id && <Check className="w-4 h-4 text-primary-600" />}

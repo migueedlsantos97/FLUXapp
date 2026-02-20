@@ -339,6 +339,21 @@ export const generateDailyInsights = (
       })
       .reduce((acc, e) => acc + convertToCurrency(e.amount, e.currency, settings.baseCurrency, data.exchangeRate), 0);
 
+    // AI Auditor: Vampire Detection (Phase 19)
+    const vampires = detectVampireExpenses(data.variableExpenses || [], settings.baseCurrency, data.exchangeRate);
+    if (vampires.length > 0) {
+      const topVampire = vampires[0];
+      const formattedLost = new Intl.NumberFormat('es-UY', { style: 'currency', currency: settings.baseCurrency, maximumFractionDigits: 0 }).format(topVampire.projection5Y);
+
+      insights.push({
+        id: 'vampire-leak',
+        type: 'alert',
+        title: '¡Gasto Vampiro Detectado!',
+        message: `"${topVampire.description}" se repite mucho. Te sacará ${formattedLost} en 5 años si no lo cortas ya.`,
+        icon: 'ShieldAlert'
+      });
+    }
+
     const burnRatePercent = (spentThisMonth / initialDisposable) * 100;
     const monthProgressPercent = (currentDayValue / daysInMonth) * 100;
 
@@ -494,4 +509,54 @@ export const calculatePreviousMonthLeftover = (
   const leftover = totalIncome - fixedTotal - peaceOfMindFund - savingsContr - spentLastMonth;
 
   return Math.max(0, leftover);
+};
+
+export const detectVampireExpenses = (
+  expenses: VariableExpense[],
+  baseCurrency: Currency,
+  exchangeRate: number
+) => {
+  // 1. Agrupar por descripción (normalizada)
+  const groups: Record<string, VariableExpense[]> = {};
+
+  expenses.forEach(e => {
+    const desc = e.description.toLowerCase().trim();
+    if (!groups[desc]) groups[desc] = [];
+    groups[desc].push(e);
+  });
+
+  const vampires: {
+    description: string;
+    monthlyAmount: number;
+    count: number;
+    projection5Y: number;
+  }[] = [];
+
+  // 2. Identificar patrones recurrentes (al menos 2 ocurrencias en meses distintos)
+  Object.entries(groups).forEach(([desc, list]) => {
+    if (list.length < 2) return;
+
+    // Obtener meses únicos
+    const months = new Set(list.map(e => {
+      const d = new Date(e.date);
+      return `${d.getFullYear()}-${d.getMonth()}`;
+    }));
+
+    if (months.size >= 2) {
+      // Calcular promedio de monto en moneda base
+      const totalInBase = list.reduce((acc, e) =>
+        acc + convertToCurrency(e.amount, e.currency, baseCurrency, exchangeRate), 0);
+      const avgAmount = totalInBase / list.length;
+
+      // Un "Vampiro" suele ser algo pequeño pero constante (< 10% del ingreso promedio aprox, pero aquí lo dejamos libre)
+      vampires.push({
+        description: list[0].description, // Mantener capitalización original de la primera ocurrencia
+        monthlyAmount: avgAmount,
+        count: months.size,
+        projection5Y: avgAmount * 12 * 5
+      });
+    }
+  });
+
+  return vampires.sort((a, b) => b.projection5Y - a.projection5Y);
 };
