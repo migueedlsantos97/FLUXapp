@@ -42,7 +42,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [isStoreLoaded, setIsStoreLoaded] = useState(false);
   const [vaultIsLocked, setVaultIsLocked] = useState(false);
 
-  console.log('[StoreContext] Provider rendering. isStoreLoaded:', isStoreLoaded, 'user:', user?.id);
+  console.log('[StoreContext V3.1 REAL] user.id:', user?.id);
 
   // Load data on mount or user change
   useEffect(() => {
