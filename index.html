@@ -11,9 +11,23 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="WARDEN" />
   <link rel="apple-touch-icon" href="/logo.svg" />
+
+  <!-- SEO & Social Sharing -->
+  <meta name="description"
+    content="WARDEN: Sistema de control financiero táctico e inflexible. Domina tu rastro de gastos y asegura tu libertad financiera. No hay lugar para la traición." />
+  <meta property="og:title" content="WARDEN: Inflexible Financial Control" />
+  <meta property="og:description"
+    content="Toma el control absoluto de tus finanzas con la estética industrial de WARDEN. Auditoría de gastos, simulador de realidad y blindaje de ahorros." />
+  <meta property="og:image" content="/logo.svg" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="WARDEN" />
+  <meta name="twitter:description" content="Control financiero táctico. Sin excusas. Sin traición." />
+  <meta name="twitter:image" content="/logo.svg" />
+
   <meta http-equiv="Content-Security-Policy"
     content="default-src 'self'; script-src 'self' 'unsafe-inline' cdn.tailwindcss.com esm.sh; style-src 'self' 'unsafe-inline' fonts.googleapis.com cdn.tailwindcss.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' esm.sh https:;" />
-  <title>WARDEN</title>
+  <title>WARDEN | Tactical Finance</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -89,6 +103,15 @@
 <body class="bg-background text-main antialiased dark selection:bg-sentry-active selection:text-white">
   <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('WARDEN: Sentry Online (SW Registered)'))
+          .catch(err => console.log('WARDEN: Sentry Offline Error:', err));
+      });
+    }
+  </script>
 </body>
 
 </html>
