@@ -1,0 +1,23 @@
+{
+    "short_name": "WARDEN",
+    "name": "WARDEN: Financial Control",
+    "icons": [
+        {
+            "src": "logo.svg",
+            "type": "image/svg+xml",
+            "sizes": "192x192 512x512",
+            "purpose": "any"
+        },
+        {
+            "src": "logo.svg",
+            "type": "image/svg+xml",
+            "sizes": "192x192 512x512",
+            "purpose": "maskable"
+        }
+    ],
+    "start_url": "/",
+    "display": "standalone",
+    "theme_color": "#0A0A0B",
+    "background_color": "#0A0A0B",
+    "orientation": "portrait"
+}
