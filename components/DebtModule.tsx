@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../context/StoreContext';
 import { Button } from './ui/Button';
@@ -16,8 +17,10 @@ import {
     Info,
     X,
     ChevronRight,
-    Search
+    Search,
+    CalendarCheck
 } from 'lucide-react';
+import { getDebtFreedomDate } from '../utils/simulation';
 
 export const DebtModule: React.FC = () => {
     const { data, updateData, addDebt, updateDebt, removeDebt, settings } = useStore();
@@ -113,8 +116,8 @@ export const DebtModule: React.FC = () => {
                     <button
                         onClick={() => updateData({ paymentStrategy: 'snowball' })}
                         className={`p-4 rounded-2xl flex flex-col items-center gap-2 border transition-all duration-300 ${data.paymentStrategy === 'snowball'
-                                ? 'border-primary-500 bg-white dark:bg-slate-800 text-primary-600 shadow-luxury'
-                                : 'border-transparent bg-slate-100 dark:bg-slate-900/50 text-slate-400'
+                            ? 'border-primary-500 bg-white dark:bg-slate-800 text-primary-600 shadow-luxury'
+                            : 'border-transparent bg-slate-100 dark:bg-slate-900/50 text-slate-400'
                             }`}
                     >
                         <Snowflake className={`w-6 h-6 transition-transform duration-500 ${data.paymentStrategy === 'snowball' ? 'scale-110' : ''}`} />
@@ -123,8 +126,8 @@ export const DebtModule: React.FC = () => {
                     <button
                         onClick={() => updateData({ paymentStrategy: 'avalanche' })}
                         className={`p-4 rounded-2xl flex flex-col items-center gap-2 border transition-all duration-300 ${data.paymentStrategy === 'avalanche'
-                                ? 'border-orange-500 bg-white dark:bg-slate-800 text-orange-600 shadow-luxury'
-                                : 'border-transparent bg-slate-100 dark:bg-slate-900/50 text-slate-400'
+                            ? 'border-orange-500 bg-white dark:bg-slate-800 text-orange-600 shadow-luxury'
+                            : 'border-transparent bg-slate-100 dark:bg-slate-900/50 text-slate-400'
                             }`}
                     >
                         <TrendingDown className={`w-6 h-6 transition-transform duration-500 ${data.paymentStrategy === 'avalanche' ? 'scale-110' : ''}`} />
@@ -253,7 +256,7 @@ export const DebtModule: React.FC = () => {
                                                 TEA {debt.interestRate}%
                                             </div>
                                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">
-                                                {debt.paidInstallments} de {debt.totalInstallments} pagas
+                                                {debt.paidInstallments}/{debt.totalInstallments} cuotas
                                             </span>
                                         </div>
                                     </div>
@@ -280,13 +283,19 @@ export const DebtModule: React.FC = () => {
                                 </div>
 
                                 {/* Actions bar */}
-                                <div className="flex justify-end gap-2">
-                                    <button onClick={() => handleEdit(debt)} className="p-3 rounded-2xl text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-all">
-                                        <Pencil className="w-4 h-4" />
-                                    </button>
-                                    <button onClick={() => removeDebt(debt.id)} className="p-3 rounded-2xl text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all">
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
+                                <div className="flex justify-between items-center gap-2">
+                                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/10 text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest border border-indigo-100 dark:border-indigo-800/50">
+                                        <CalendarCheck className="w-3 h-3" />
+                                        Libre: {getDebtFreedomDate(debt)}
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button onClick={() => handleEdit(debt)} className="p-3 rounded-2xl text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-all">
+                                            <Pencil className="w-4 h-4" />
+                                        </button>
+                                        <button onClick={() => removeDebt(debt.id)} className="p-3 rounded-2xl text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all">
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
                                 </div>
                             </motion.div>
                         );

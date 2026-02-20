@@ -15,6 +15,7 @@ import { calculateDailyBudget, calculateTotalIncome, calculateSequestration, con
 import { PulseModule } from './PulseModule';
 import { parseSmartInput } from '../utils/ai';
 import { GuardianMode, Currency, VariableExpense, ExpenseCategory } from '../types';
+import { RealitySimulator } from './RealitySimulator';
 import {
     LogOut,
     LayoutDashboard,
@@ -50,7 +51,8 @@ import {
     Lightbulb,
     ChevronRight,
     Coins,
-    Lock as LockIcon
+    Lock as LockIcon,
+    Calculator
 } from 'lucide-react';
 import { URUGUAY_NATIONAL_HOLIDAYS } from '../utils/holidays';
 
@@ -83,6 +85,7 @@ interface DashboardHomeProps {
     setIsProfileOpen: (open: boolean) => void;
     insights: any[];
     lockVault: () => void;
+    setIsSimulatorOpen: (open: boolean) => void;
 }
 
 interface ProfileModalProps {
@@ -105,10 +108,10 @@ const NavItem: React.FC<NavItemProps> = ({ view, icon: Icon, label, currentView,
         className={`flex flex-col items-center justify-center w-full py-3 transition-all duration-300 ${currentView === view
             ? 'text-primary-600 dark:text-primary-400 transform -translate-y-1'
             : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
-            }`}
+            } `}
     >
-        <div className={`p-1 rounded-full mb-1 transition-all ${currentView === view ? 'bg-primary-50 dark:bg-primary-900/30' : ''}`}>
-            <Icon className={`w-6 h-6 ${currentView === view ? 'stroke-[2.5px]' : 'stroke-2'}`} />
+        <div className={`p-1 rounded-full mb-1 transition-all ${currentView === view ? 'bg-primary-50 dark:bg-primary-900/30' : ''} `}>
+            <Icon className={`w-6 h-6 ${currentView === view ? 'stroke-[2.5px]' : 'stroke-2'} `} />
         </div>
         <span className="text-[10px] font-semibold tracking-wide">{label}</span>
     </button>
@@ -224,7 +227,8 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
     setIsImportCenterOpen,
     setIsProfileOpen,
     insights,
-    lockVault
+    lockVault,
+    setIsSimulatorOpen
 }) => (
     <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -238,8 +242,8 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
             <div className={`absolute -right-20 -top-20 w-60 h-60 rounded-full blur-[80px] opacity-20 pointer-events-none transition-colors duration-1000 ${remainingDailyAllowance < 0 ? 'bg-red-500' : 'bg-primary-500'}`}></div>
 
             <div className="relative z-10">
-                <div className="flex justify-between items-start mb-4">
-                    <div className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border ${verdict.bg} ${verdict.color}`}>
+                <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start gap-4 mb-6">
+                    <div className={`px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border ${verdict.bg} ${verdict.color} `}>
                         {verdict.icon}
                         <span>{verdict.text}</span>
                     </div>
@@ -259,6 +263,13 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
                             title="Importar Datos"
                         >
                             <Database className="w-5 h-5" />
+                        </button>
+                        <button
+                            onClick={() => setIsSimulatorOpen(true)}
+                            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 hover:text-indigo-500 transition-colors"
+                            title="Reality Simulator"
+                        >
+                            <Calculator className="w-5 h-5" />
                         </button>
                     </div>
                 </div>
@@ -351,7 +362,7 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
                                 const peaceOfMind = totalIncome * (settings.peaceOfMindPercentage / 100);
                                 const available = totalIncome - totalFixed - peaceOfMind;
                                 const health = totalIncome > 0 ? (available / totalIncome) * 100 : 0;
-                                return `${health.toFixed(0)}%`;
+                                return `${health.toFixed(0)}% `;
                             })()}
                         </h3>
                         <span className="text-[10px] font-bold text-muted mb-1">libre de compromisos</span>
@@ -365,7 +376,7 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
                                     const totalFixed = data.fixedExpenses.reduce((acc: number, exp: any) => acc + convertToCurrency(exp.amount, exp.currency, settings.baseCurrency, data.exchangeRate), 0);
                                     const peaceOfMind = totalIncome * (settings.peaceOfMindPercentage / 100);
                                     const available = totalIncome - totalFixed - peaceOfMind;
-                                    return totalIncome > 0 ? `${Math.max(0, Math.min(100, (available / totalIncome) * 100))}%` : '0%';
+                                    return totalIncome > 0 ? `${Math.max(0, Math.min(100, (available / totalIncome) * 100))}% ` : '0%';
                                 })()
                             }}
                             className="h-full bg-primary-500"
@@ -461,14 +472,14 @@ const SweepingModal: React.FC<{
                                 key={goal.id}
                                 disabled={isFull}
                                 onClick={() => setSelectedGoal(goal.id)}
-                                className={`w-full p-4 rounded-2xl border-2 transition-all flex items-center justify-between ${isFull ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-800' : selectedGoal === goal.id ? 'border-primary-500 bg-primary-50/50 dark:bg-primary-900/20' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200'}`}
+                                className={`w - full p - 4 rounded - 2xl border - 2 transition - all flex items - center justify - between ${isFull ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-800' : selectedGoal === goal.id ? 'border-primary-500 bg-primary-50/50 dark:bg-primary-900/20' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200'} `}
                             >
                                 <div className="flex items-center gap-3 text-left">
                                     <span className="text-2xl">{goal.icon}</span>
                                     <div>
                                         <p className="text-xs font-black uppercase text-slate-800 dark:text-white leading-none mb-1">{goal.name}</p>
                                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none">
-                                            {isFull ? 'Meta Alcanzada 🎉' : `Cofre de ${goal.targetAmount > 0 ? 'Meta' : 'Ahorro General'}`}
+                                            {isFull ? 'Meta Alcanzada 🎉' : `Cofre de ${goal.targetAmount > 0 ? 'Meta' : 'Ahorro General'} `}
                                         </p>
                                     </div>
                                 </div>
@@ -847,6 +858,7 @@ export const Dashboard: React.FC = () => {
     const [isImportCenterOpen, setIsImportCenterOpen] = useState(false);
     const [isConfessionOpen, setIsConfessionOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
     const [isSweepingModalOpen, setIsSweepingModalOpen] = useState(false);
     const [leftoverAmount, setLeftoverAmount] = useState(0);
 
@@ -886,7 +898,7 @@ export const Dashboard: React.FC = () => {
 
             const lastMonth = new Date();
             lastMonth.setDate(0); // Último día del mes pasado
-            const prevMonthKey = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
+            const prevMonthKey = `${lastMonth.getFullYear()} -${String(lastMonth.getMonth() + 1).padStart(2, '0')} `;
 
             updateData({
                 savingGoals: updatedGoals,
@@ -1162,6 +1174,7 @@ export const Dashboard: React.FC = () => {
                             formatMoney={formatMoney}
                             setIsImportCenterOpen={setIsImportCenterOpen}
                             setIsProfileOpen={setIsProfileOpen}
+                            setIsSimulatorOpen={setIsSimulatorOpen}
                             onSetView={setCurrentView}
                             insights={dailyInsights}
                             lockVault={lockVault}
@@ -1338,6 +1351,10 @@ export const Dashboard: React.FC = () => {
                         setIsSweepingModalOpen(false);
                     }}
                 />
+            )}
+
+            {isSimulatorOpen && (
+                <RealitySimulator onClose={() => setIsSimulatorOpen(false)} />
             )}
 
         </div>
