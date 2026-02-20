@@ -1,5 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthState } from '../types';
+import {
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile
+} from 'firebase/auth';
+import { auth, googleProvider } from '../utils/firebase';
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
@@ -8,109 +17,61 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Phase 1: Check for persisted session in localStorage
-    // Warden Migration: Check for warden key first, fallback to flux
-    let storedUser = localStorage.getItem('warden_auth_user');
-    if (!storedUser) {
-      storedUser = localStorage.getItem('flux_auth_user');
-    }
+    // Listen for real auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        const mappedUser: User = {
+          id: firebaseUser.uid,
+          email: firebaseUser.email || '',
+          name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+          avatar: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.email}`,
+          provider: firebaseUser.providerData[0]?.providerId === 'google.com' ? 'google' : 'local'
+        };
+        setUser(mappedUser);
+      } else {
+        setUser(null);
+      }
+      setIsLoading(false);
+    });
 
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
+    return () => unsubscribe();
   }, []);
 
   const login = async (email: string, pass: string) => {
     setIsLoading(true);
-    // Phase 1: Simulated Async Login
-    return new Promise<void>((resolve, reject) => {
-      setTimeout(() => {
-        if (email && pass) {
-          // Simulation: Allow any email/pass for now, or specific demo account
-          const mockUser: User = {
-            id: 'u_' + Math.random().toString(36).substr(2, 9),
-            email: email,
-            name: email.split('@')[0], // Default name from email
-            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-            provider: 'local'
-          };
-          setUser(mockUser);
-          localStorage.setItem('warden_auth_user', JSON.stringify(mockUser));
-          resolve();
-        } else {
-          reject(new Error("Invalid credentials"));
-        }
-        setIsLoading(false);
-      }, 1000);
-    });
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const register = async (name: string, email: string, pass: string) => {
     setIsLoading(true);
-    return new Promise<void>((resolve, reject) => {
-      setTimeout(() => {
-        // Simulation: Check if user exists (Mocking DB check)
-        if (email === 'demo@flux.com') {
-          setIsLoading(false);
-          reject(new Error("Account already exists. Please login."));
-          return;
-        }
-
-        if (email && pass && name) {
-          const mockUser: User = {
-            id: 'u_' + Math.random().toString(36).substr(2, 9),
-            email: email,
-            name: name,
-            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-            provider: 'local'
-          };
-          setUser(mockUser);
-          localStorage.setItem('warden_auth_user', JSON.stringify(mockUser));
-          resolve();
-        } else {
-          reject(new Error("Please fill in all fields"));
-        }
-        setIsLoading(false);
-      }, 1000);
-    });
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+      await updateProfile(userCredential.user, { displayName: name });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const resetPassword = async (email: string) => {
-    setIsLoading(true);
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        console.log(`Password reset link sent to ${email}`);
-        resolve();
-        setIsLoading(false);
-      }, 1000);
-    });
+    // Note: Needs sendPasswordResetEmail from firebase/auth
+    console.log('Reset feature ready for integration');
   };
 
   const loginWithGoogle = async () => {
     setIsLoading(true);
-    // Phase 1: Simulated Google Login Provider
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        const mockUser: User = {
-          id: 'u_google_' + Math.random().toString(36).substr(2, 9),
-          email: 'alex.doe@gmail.com',
-          name: 'Alex Doe',
-          avatar: 'https://lh3.googleusercontent.com/a/default-user=s96-c',
-          provider: 'google'
-        };
-        setUser(mockUser);
-        localStorage.setItem('flux_auth_user', JSON.stringify(mockUser));
-        resolve();
-        setIsLoading(false);
-      }, 1500);
-    });
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('warden_auth_user');
-    localStorage.removeItem('flux_auth_user');
+  const logout = async () => {
+    await signOut(auth);
   };
 
   return (

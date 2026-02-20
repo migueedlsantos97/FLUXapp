@@ -65,8 +65,15 @@ export const LoginScreen: React.FC = () => {
     setError('');
     try {
       await loginWithGoogle();
-    } catch (err) {
-      setError('Google login failed.');
+    } catch (err: any) {
+      console.error("Google Login Error:", err);
+      if (err.code === 'auth/popup-closed-by-user') {
+        setError('Connection cancelled by user.');
+      } else if (err.code === 'auth/configuration-not-found') {
+        setError('Firebase not configured. Please check your keys.');
+      } else {
+        setError('Google authentication failed. ' + (err.message || ''));
+      }
     } finally {
       setIsGoogleLoading(false);
     }
